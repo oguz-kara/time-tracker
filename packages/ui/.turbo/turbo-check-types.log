@@ -1,0 +1,13 @@
+
+> @jetframe/ui@0.1.0 check-types /Users/bussss/projects/time-tracker/packages/ui
+> tsc --noEmit
+
+src/button.tsx(4,22): error TS2307: Cannot find module '@radix-ui/react-slot' or its corresponding type declarations.
+src/button.tsx(48,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/card.tsx(15,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/card.tsx(21,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/card.tsx(22,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/card.tsx(24,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/code.tsx(10,10): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+tsconfig.json(2,14): error TS6053: File '@repo/typescript-config/react-library.json' not found.
+ ELIFECYCLE  Command failed with exit code 2.

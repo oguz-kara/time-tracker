@@ -1,0 +1,5 @@
+# Ignore all JSON data files (can be large)
+*.json
+
+# Keep .gitkeep
+!.gitkeep

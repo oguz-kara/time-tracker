@@ -1,0 +1,13 @@
+import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import { {{moduleName}}s } from './schema';
+
+/**
+ * {{ModuleName}} TypeScript Types
+ * Inferred from database schema
+ */
+
+export type {{ModuleName}} = InferSelectModel<typeof {{moduleName}}s>;
+export type New{{ModuleName}} = Omit<
+  InferInsertModel<typeof {{moduleName}}s>,
+  'id' | 'organizationId' | 'createdAt' | 'updatedAt'
+>;

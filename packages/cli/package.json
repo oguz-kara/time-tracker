@@ -1,0 +1,25 @@
+{
+  "name": "@jetframe/cli",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "jet": "./bin/jet.js"
+  },
+  "scripts": {
+    "build": "echo 'CLI uses tsx at runtime, no build needed'"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "prompts": "^2.4.2",
+    "fs-extra": "^11.2.0",
+    "chalk": "^5.4.1",
+    "ora": "^8.1.1",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/prompts": "^2.4.9",
+    "@types/fs-extra": "^11.0.4",
+    "typescript": "^5.6.0"
+  }
+}

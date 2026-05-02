@@ -1,0 +1,36 @@
+{
+  "name": "jetframe",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "db:generate": "cd packages/db && npm run db:generate",
+    "db:push": "cd packages/db && npm run db:push",
+    "db:studio": "cd packages/db && npm run db:studio",
+    "graphql:generate": "cd apps/web && npm run graphql:generate",
+    "graphql:watch": "cd apps/web && npm run graphql:watch",
+    "jet": "tsx packages/cli/bin/jet.ts"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "tsx": "^4.19.2",
+    "turbo": "^2.6.3",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.947.0",
+    "@aws-sdk/s3-request-presigner": "^3.947.0",
+    "nanoid": "^5.1.6"
+  }
+}

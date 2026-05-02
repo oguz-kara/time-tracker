@@ -1,0 +1,35 @@
+{
+  "name": "@jetframe/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./schema/auth": "./schema/auth.ts",
+    "./schema/billing": "./schema/billing.ts",
+    "./schema/ai": "./schema/ai.ts",
+    "./schema/files": "./schema/files.ts",
+    "./schema/notifications": "./schema/notifications.ts",
+    "./schema/projects": "./schema/projects.ts",
+    "./schema/tasks": "./schema/tasks.ts",
+    "./schema/time-tracking": "./schema/time_tracking.ts",
+    "./utils/pagination": "./utils/pagination.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.5",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "drizzle-kit": "^0.28.1",
+    "typescript": "^5.6.0"
+  }
+}

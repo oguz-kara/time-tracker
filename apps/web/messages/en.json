@@ -1,0 +1,114 @@
+{
+  "common": {
+    "appName": "DenTracker",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "saved": "Saved",
+    "failed": "Failed",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "landing": {
+    "eyebrow": "A personal time tracker",
+    "headlineTop": "Eight hours.",
+    "headlineBottom": "Actually worked.",
+    "subtitle": "Working from home, the day blurs — meals, errands, a quick smoke. Press start when you sit down. Press stop when you don’t. Find out, at a glance, whether you actually put in your hours.",
+    "cta": "Start tracking",
+    "footnote": "One user · No analytics · Magic-link auth",
+    "footerYear": "Personal · 2026",
+    "card": {
+      "running": "Running",
+      "todayProgress": "today · 5h 23m / 8h",
+      "focusBlock": "Focus block",
+      "deepWork": "deep work",
+      "meeting": "meeting"
+    },
+    "openApp": "Open app"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "track": "Track",
+    "preferences": "Preferences",
+    "settingsSection": "Settings"
+  },
+  "track": {
+    "title": "Track",
+    "timer": {
+      "start": "Start",
+      "stop": "Stop",
+      "placeholder": "What are you working on?",
+      "failedToStart": "Failed to start",
+      "failedToStop": "Failed to stop"
+    },
+    "goal": {
+      "today": "Today",
+      "overGoal": "{minutes} over goal"
+    },
+    "entries": {
+      "title": "Today's entries",
+      "addEntry": "Add entry",
+      "empty": "No entries yet today.",
+      "now": "now",
+      "deleteConfirmTitle": "Delete this entry?",
+      "deleteConfirmDescription": "This cannot be undone.",
+      "noDescription": "—"
+    },
+    "totals": {
+      "thisWeek": "This week",
+      "thisMonth": "This month"
+    },
+    "dialog": {
+      "editTitle": "Edit entry",
+      "addTitle": "Add entry",
+      "start": "Start",
+      "stop": "Stop",
+      "stopRunning": "Stop (running — use Stop button)",
+      "description": "Description",
+      "stopRequired": "Stop time is required for manual entries",
+      "saveFailed": "Failed"
+    }
+  },
+  "dashboard": {
+    "greetingNamed": "Hey, {name}.",
+    "greeting": "Hey.",
+    "subtitle": "How the last few weeks have actually gone.",
+    "stats": {
+      "today": "Today",
+      "todayHint": "{percent}% of goal",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "streak": "Streak",
+      "streakDays": "{days}d",
+      "streakNone": "no current streak",
+      "streakHint": "days at goal",
+      "streakNoneShort": "—"
+    },
+    "charts": {
+      "todayTitle": "Today",
+      "todaySub": "Hour by hour.",
+      "thirtyTitle": "Last 30 days",
+      "thirtySub": "Daily hours worked, with goal line.",
+      "weekTitle": "This week",
+      "weekSub": "Day by day.",
+      "goal": "goal {hours}h"
+    }
+  },
+  "settings": {
+    "title": "Tracking settings",
+    "dailyGoal": "Daily goal (minutes)",
+    "weekStartsOn": "Week starts on",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "timezone": "Timezone",
+    "language": "Language",
+    "languageEn": "English",
+    "languageTr": "Türkçe",
+    "saveFailed": "Failed",
+    "saved": "Settings saved"
+  }
+}

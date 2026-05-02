@@ -1,0 +1,24 @@
+import { gql } from 'graphql-request';
+
+/**
+ * {{ModuleName}} GraphQL Mutations
+ * Used for client-side data modifications
+ */
+
+export const CREATE_{{MODULE_NAME}} = gql`
+  mutation Create{{ModuleName}}($input: Create{{ModuleName}}Input!) {
+    create{{ModuleName}}(input: $input) {
+      id
+      name
+      organizationId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_{{MODULE_NAME}} = gql`
+  mutation Delete{{ModuleName}}($id: String!) {
+    delete{{ModuleName}}(id: $id)
+  }
+`;

@@ -1,0 +1,177 @@
+# .claudeignore - Context Optimization for JetFrame
+# Excludes large, generated, and unnecessary files from Claude Code's context
+
+# ============================================================================
+# Dependencies (Largest Context Polluters)
+# ============================================================================
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# ============================================================================
+# Lock Files (Huge, Low Information Value)
+# ============================================================================
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+
+# ============================================================================
+# Build Outputs & Compiled Assets
+# ============================================================================
+.next/
+.turbo/
+dist/
+build/
+out/
+.output/
+*.tsbuildinfo
+
+# ============================================================================
+# Environment & Secrets (Security + Already blocked in settings.json)
+# ============================================================================
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+*.pem
+*.key
+*.cert
+secrets/
+credentials/
+
+# ============================================================================
+# Generated Code (Auto-regenerated, Not Source of Truth)
+# ============================================================================
+# GraphQL Codegen - All generated hooks, types, and operations
+**/generated/
+**/__generated__/
+**/graphql/generated.ts
+**/graphql/**/generated.ts
+**/gql/
+**/*.generated.ts
+**/*.generated.tsx
+**/codegen-output/
+
+# Drizzle Migrations (Review these manually when needed with @)
+packages/db/drizzle/
+**/migrations/*.sql
+
+# ============================================================================
+# Cache & Temporary Files
+# ============================================================================
+.cache/
+.temp/
+.tmp/
+*.cache
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.vercel/
+.netlify/
+
+# ============================================================================
+# Test Coverage Reports (Large, Machine-Generated)
+# ============================================================================
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+
+# ============================================================================
+# Logs (Verbose, Low Value)
+# ============================================================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============================================================================
+# OS & Editor Files (Zero Business Value)
+# ============================================================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================================================
+# Large Media & Binary Assets (Use @ to reference when needed)
+# ============================================================================
+*.mp4
+*.mov
+*.avi
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.pdf
+*.zip
+*.tar.gz
+
+# ============================================================================
+# Documentation Assets (Marketing, not code-critical)
+# ============================================================================
+**/public/images/
+**/public/videos/
+**/assets/marketing/
+
+# ============================================================================
+# Git Internals (Already handled by Claude)
+# ============================================================================
+.git/
+.gitattributes
+
+# ============================================================================
+# Storybook & Component Development
+# ============================================================================
+storybook-static/
+.storybook/
+chromatic-build/
+
+# ============================================================================
+# Monorepo Build Artifacts
+# ============================================================================
+apps/**/dist/
+packages/**/dist/
+apps/**/.next/
+packages/**/.turbo/
+
+# ============================================================================
+# Database Files (Use schema files, not raw DB)
+# ============================================================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================================================
+# AI/LLM Context (Prevent recursive loops)
+# ============================================================================
+.claude/commands/*.log
+.cursor/
+
+# ============================================================================
+# EXCEPTIONS - Always Include These Critical Files
+# ============================================================================
+# (Use ! prefix to un-ignore, but .claudeignore doesn't support negation)
+# Critical files to KEEP in context:
+# - CLAUDE.md (System Prompt)
+# - saas.config.ts (Configuration Brain)
+# - packages/db/schema/*.ts (Database Schema)
+# - modules/**/api.ts (GraphQL Resolvers)
+# - modules/**/service.ts (Business Logic)
+# - *.config.{ts,js} (All config files)

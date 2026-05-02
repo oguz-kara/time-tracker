@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Linear "Midnight Command Center" design system
+   See apps/web/design-system.md for the full reference.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* ----- Linear palette (HSL components, used via hsl(var(--...))) ----- */
+    --pitch-black: 210 11% 4%;        /* #08090a */
+    --graphite: 210 6% 6%;             /* #0f1011 */
+    --deep-slate: 210 4% 9%;           /* #161718 */
+    --charcoal-grey: 223 9% 15%;       /* #23252a */
+    --muted-ash: 210 2% 20%;           /* #323334 */
+    --gunmetal: 214 6% 23%;            /* #383b3f */
+    --porcelain: 180 7% 97%;           /* #f7f8f8 */
+    --light-steel: 218 21% 85%;        /* #d0d6e0 */
+    --storm-cloud: 219 6% 57%;         /* #8a8f98 */
+    --fog-grey: 218 5% 41%;            /* #62666d */
+    --alabaster: 240 2% 90%;           /* #e5e5e6 */
+    --neon-lime: 64 89% 54%;           /* #e4f222 */
+    --aether-blue: 234 56% 60%;        /* #5e6ad2 */
+    --forest-green: 139 100% 28%;      /* #008d2c */
+    --cyan-spark: 186 98% 40%;         /* #02b8cc */
+    --emerald: 134 62% 40%;            /* #27a644 */
+    --warning-red: 0 79% 63%;          /* #eb5757 */
+    --deep-violet: 239 84% 67%;        /* #6366f1 */
+    --amethyst: 258 90% 66%;           /* #8b5cf6 */
+
+    /* ----- shadcn semantic tokens, mapped to the Linear palette -----
+       Existing shadcn components reference these vars; remapping here
+       cascades the new look without touching component files. */
+
+    --background: var(--pitch-black);
+    --foreground: var(--porcelain);
+
+    --card: var(--graphite);
+    --card-foreground: var(--porcelain);
+
+    --popover: var(--deep-slate);
+    --popover-foreground: var(--porcelain);
+
+    /* Primary action = Neon Lime on Pitch Black text (per design-system.md) */
+    --primary: var(--neon-lime);
+    --primary-foreground: var(--pitch-black);
+
+    --secondary: var(--charcoal-grey);
+    --secondary-foreground: var(--porcelain);
+
+    --muted: var(--charcoal-grey);
+    --muted-foreground: var(--storm-cloud);
+
+    --accent: var(--charcoal-grey);
+    --accent-foreground: var(--porcelain);
+
+    --destructive: var(--warning-red);
+    --destructive-foreground: var(--porcelain);
+
+    --border: var(--charcoal-grey);
+    --input: var(--gunmetal);
+    --ring: var(--neon-lime);
+
+    --chart-1: var(--neon-lime);
+    --chart-2: var(--aether-blue);
+    --chart-3: var(--cyan-spark);
+    --chart-4: var(--emerald);
+    --chart-5: var(--amethyst);
+
+    /* Radius — design system says 6px for cards, buttons, inputs */
+    --radius: 0.375rem; /* 6px */
+  }
+
+  /* The design is dark-only. .dark mirrors :root so any explicit
+     <html class="dark"> still works without redefining anything. */
+  .dark {
+    --background: var(--pitch-black);
+    --foreground: var(--porcelain);
+    --card: var(--graphite);
+    --card-foreground: var(--porcelain);
+    --popover: var(--deep-slate);
+    --popover-foreground: var(--porcelain);
+    --primary: var(--neon-lime);
+    --primary-foreground: var(--pitch-black);
+    --secondary: var(--charcoal-grey);
+    --secondary-foreground: var(--porcelain);
+    --muted: var(--charcoal-grey);
+    --muted-foreground: var(--storm-cloud);
+    --accent: var(--charcoal-grey);
+    --accent-foreground: var(--porcelain);
+    --destructive: var(--warning-red);
+    --destructive-foreground: var(--porcelain);
+    --border: var(--charcoal-grey);
+    --input: var(--gunmetal);
+    --ring: var(--neon-lime);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv01", "ss03"; /* Inter OpenType features per design-system.md */
+    letter-spacing: -0.13px;
+  }
+
+  /* Linear-style headings: tight tracking */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.22px;
+  }
+}

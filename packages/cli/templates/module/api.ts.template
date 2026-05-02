@@ -1,0 +1,81 @@
+import { builder } from '@/lib/graphql/builder';
+import { z } from 'zod';
+import * as {{moduleName}}Service from './service';
+
+/**
+ * {{ModuleName}} GraphQL API Layer
+ * Thin resolvers that delegate to service layer
+ */
+
+// Input validation schemas
+const Create{{ModuleName}}Input = z.object({
+  name: z.string().min(1).max(255),
+  // Add your fields here
+});
+
+// GraphQL Object Type
+export const {{ModuleName}}Type = builder.objectRef<{
+  id: string;
+  name: string;
+  organizationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}>('{{ModuleName}}').implement({
+  fields: (t) => ({
+    id: t.exposeID('id'),
+    name: t.exposeString('name'),
+    organizationId: t.exposeString('organizationId'),
+    createdAt: t.expose('createdAt', { type: 'DateTime' }),
+    updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
+  }),
+});
+
+// Queries
+builder.queryFields((t) => ({
+  {{moduleName}}s: t.field({
+    type: [{{ModuleName}}Type],
+    authScopes: { authenticated: true },
+    resolve: async (_, __, ctx) => {
+      if (!ctx.session) throw new Error('Not authenticated');
+      return {{moduleName}}Service.list(ctx.session.activeOrganizationId);
+    },
+  }),
+  {{moduleName}}: t.field({
+    type: {{ModuleName}}Type,
+    authScopes: { authenticated: true },
+    args: {
+      id: t.arg.string({ required: true }),
+    },
+    resolve: async (_, args, ctx) => {
+      if (!ctx.session) throw new Error('Not authenticated');
+      return {{moduleName}}Service.getById(args.id, ctx.session.activeOrganizationId);
+    },
+  }),
+}));
+
+// Mutations
+builder.mutationFields((t) => ({
+  create{{ModuleName}}: t.field({
+    type: {{ModuleName}}Type,
+    authScopes: { authenticated: true },
+    args: {
+      input: t.arg({ type: Create{{ModuleName}}Input }),
+    },
+    resolve: async (_, args, ctx) => {
+      if (!ctx.session) throw new Error('Not authenticated');
+      return {{moduleName}}Service.create(args.input, ctx.session.activeOrganizationId);
+    },
+  }),
+  delete{{ModuleName}}: t.field({
+    type: 'Boolean',
+    authScopes: { authenticated: true },
+    args: {
+      id: t.arg.string({ required: true }),
+    },
+    resolve: async (_, args, ctx) => {
+      if (!ctx.session) throw new Error('Not authenticated');
+      await {{moduleName}}Service.deleteById(args.id, ctx.session.activeOrganizationId);
+      return true;
+    },
+  }),
+}));

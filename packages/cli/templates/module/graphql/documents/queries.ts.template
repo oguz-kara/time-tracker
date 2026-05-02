@@ -1,0 +1,30 @@
+import { gql } from 'graphql-request';
+
+/**
+ * {{ModuleName}} GraphQL Queries
+ * Used for client-side data fetching
+ */
+
+export const GET_{{MODULE_NAME}}S = gql`
+  query Get{{ModuleName}}s {
+    {{moduleName}}s {
+      id
+      name
+      organizationId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_{{MODULE_NAME}} = gql`
+  query Get{{ModuleName}}($id: String!) {
+    {{moduleName}}(id: $id) {
+      id
+      name
+      organizationId
+      createdAt
+      updatedAt
+    }
+  }
+`;

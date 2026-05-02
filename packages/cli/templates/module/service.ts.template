@@ -1,0 +1,108 @@
+import { db } from '@jetframe/db';
+import { {{moduleName}}s } from './schema';
+import { eq, and } from 'drizzle-orm';
+import type { New{{ModuleName}}, {{ModuleName}} } from './types';
+
+/**
+ * {{ModuleName}} Service
+ * Business logic layer - no GraphQL dependencies
+ */
+
+/**
+ * List all {{moduleName}}s for an organization
+ */
+export async function list(organizationId: string): Promise<{{ModuleName}}[]> {
+  return db.query.{{moduleName}}s.findMany({
+    where: eq({{moduleName}}s.organizationId, organizationId),
+    orderBy: ({{moduleName}}s, { desc }) => [desc({{moduleName}}s.createdAt)],
+  });
+}
+
+/**
+ * Get a single {{moduleName}} by ID
+ */
+export async function getById(
+  id: string,
+  organizationId: string
+): Promise<{{ModuleName}}> {
+  const {{moduleName}} = await db.query.{{moduleName}}s.findFirst({
+    where: and(
+      eq({{moduleName}}s.id, id),
+      eq({{moduleName}}s.organizationId, organizationId)
+    ),
+  });
+
+  if (!{{moduleName}}) {
+    throw new Error('{{ModuleName}} not found');
+  }
+
+  return {{moduleName}};
+}
+
+/**
+ * Create a new {{moduleName}}
+ */
+export async function create(
+  input: New{{ModuleName}},
+  organizationId: string
+): Promise<{{ModuleName}}> {
+  const [{{moduleName}}] = await db
+    .insert({{moduleName}}s)
+    .values({
+      ...input,
+      organizationId,
+    })
+    .returning();
+
+  return {{moduleName}};
+}
+
+/**
+ * Update an existing {{moduleName}}
+ */
+export async function update(
+  id: string,
+  input: Partial<New{{ModuleName}}>,
+  organizationId: string
+): Promise<{{ModuleName}}> {
+  const [updated] = await db
+    .update({{moduleName}}s)
+    .set({
+      ...input,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq({{moduleName}}s.id, id),
+        eq({{moduleName}}s.organizationId, organizationId)
+      )
+    )
+    .returning();
+
+  if (!updated) {
+    throw new Error('{{ModuleName}} not found');
+  }
+
+  return updated;
+}
+
+/**
+ * Delete a {{moduleName}} by ID
+ */
+export async function deleteById(
+  id: string,
+  organizationId: string
+): Promise<void> {
+  const result = await db
+    .delete({{moduleName}}s)
+    .where(
+      and(
+        eq({{moduleName}}s.id, id),
+        eq({{moduleName}}s.organizationId, organizationId)
+      )
+    );
+
+  if (result.rowCount === 0) {
+    throw new Error('{{ModuleName}} not found');
+  }
+}
