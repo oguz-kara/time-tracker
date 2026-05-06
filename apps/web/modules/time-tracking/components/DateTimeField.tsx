@@ -87,12 +87,21 @@ export function DateTimeField({
           <CalendarIcon className="mr-2 h-4 w-4" />
           {value ? format(value, "PPP") : <span>{placeholder}</span>}
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent
+          // Match the trigger's width via Base UI's anchor CSS variable.
+          // Tailwind v3 doesn't support shorthand bg-(--var), so we use the
+          // explicit `[width:var(--anchor-width)]` form.
+          className="p-0 [width:var(--anchor-width)]"
+          align="start"
+        >
           <Calendar
             mode="single"
             selected={value ?? undefined}
             onSelect={handleDateSelect}
             defaultMonth={value ?? undefined}
+            // Stretch calendar to popover width and bump cell size so the
+            // grid actually fills available space instead of clustering left.
+            className="w-full [--cell-size:40px]"
           />
         </PopoverContent>
       </Popover>
