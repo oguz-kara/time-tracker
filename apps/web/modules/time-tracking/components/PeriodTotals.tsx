@@ -5,6 +5,7 @@ import {
   useGetUserSettingsQuery,
 } from "@/lib/graphql/generated";
 import { useTranslations } from "next-intl";
+import { Card, CardContent } from "@/components/ui/card";
 import { weekRange, monthRange, formatMinutes } from "../utils/format";
 import { useUserTimezone } from "../hooks/useUserTimezone";
 
@@ -25,18 +26,22 @@ export function PeriodTotals() {
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      <div className="rounded-md border border-border bg-card p-4">
-        <div className="text-xs text-muted-foreground">{t("thisWeek")}</div>
-        <div className="mt-2 font-mono text-2xl font-medium tabular-nums">
-          {formatMinutes(sum(weekData?.dailyTotals))}
-        </div>
-      </div>
-      <div className="rounded-md border border-border bg-card p-4">
-        <div className="text-xs text-muted-foreground">{t("thisMonth")}</div>
-        <div className="mt-2 font-mono text-2xl font-medium tabular-nums">
-          {formatMinutes(sum(monthData?.dailyTotals))}
-        </div>
-      </div>
+      <Card size="sm">
+        <CardContent>
+          <div className="text-xs text-muted-foreground">{t("thisWeek")}</div>
+          <div className="mt-2 font-mono text-2xl font-medium tabular-nums">
+            {formatMinutes(sum(weekData?.dailyTotals))}
+          </div>
+        </CardContent>
+      </Card>
+      <Card size="sm">
+        <CardContent>
+          <div className="text-xs text-muted-foreground">{t("thisMonth")}</div>
+          <div className="mt-2 font-mono text-2xl font-medium tabular-nums">
+            {formatMinutes(sum(monthData?.dailyTotals))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

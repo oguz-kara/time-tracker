@@ -3,8 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
-import { db, eq } from "@jetframe/db";
-import { userSettings } from "@jetframe/db/schema/time-tracking";
+import { updateUserSettings } from "@/modules/user-settings/service";
 import { isLocale, LOCALE_COOKIE, type Locale } from "./config";
 
 /**
@@ -30,13 +29,13 @@ export async function setLocaleAction(next: Locale | string): Promise<void> {
   });
 
   // Best-effort DB persistence for authed users; never fail the action over it.
+  // Routes through updateUserSettings so the row is auto-created if missing
+  // (UPDATE alone would silently no-op for users who haven't yet hit a code
+  // path that materializes user_settings).
   try {
     const session = await auth();
     if (session?.userId) {
-      await db
-        .update(userSettings)
-        .set({ locale: next, updatedAt: new Date() })
-        .where(eq(userSettings.userId, session.userId));
+      await updateUserSettings(session.userId, { locale: next });
     }
   } catch (err) {
     console.warn("[setLocaleAction] failed to persist locale to DB:", err);

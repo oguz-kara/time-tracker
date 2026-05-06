@@ -15,6 +15,15 @@ import { todayRange, formatMinutes } from "../utils/format";
 import { USE_MOCK_TIME_DATA, getMockEntries } from "../mocks/daily-totals";
 import { useUserTimezone } from "../hooks/useUserTimezone";
 import { useTranslations } from "next-intl";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const chartConfig = {
   minutes: {
@@ -87,22 +96,20 @@ export function TodayHourlyChart() {
   const showLoading = isLoading && !USE_MOCK_TIME_DATA;
 
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <div className="mb-4 flex items-baseline justify-between">
-        <div>
-          <h3 className="text-sm font-medium">{t("todayTitle")}</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {t("todaySub")}
-          </p>
+    <Card size="sm">
+      <CardHeader className="flex flex-row items-baseline justify-between space-y-0">
+        <div className="space-y-0.5">
+          <CardTitle className="text-sm font-medium">{t("todayTitle")}</CardTitle>
+          <CardDescription className="text-xs">{t("todaySub")}</CardDescription>
         </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-[0.18em]">
           {formatMinutes(totalMinutes)}
-        </div>
-      </div>
-
-      {showLoading ? (
-        <div className="h-[180px] animate-pulse rounded bg-muted" />
-      ) : (
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        {showLoading ? (
+          <Skeleton className="h-[180px] w-full" />
+        ) : (
         <ChartContainer config={chartConfig} className="h-[180px] w-full">
           <BarChart data={chartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="2 4" />
@@ -155,7 +162,8 @@ export function TodayHourlyChart() {
             />
           </BarChart>
         </ChartContainer>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -5,17 +5,19 @@ import { ValidationError } from "@/modules/shared/errors";
 import { isLocale } from "@/i18n/config";
 
 export async function getOrCreateUserSettings(userId: string): Promise<UserSettings> {
-  const existing = await db
+  // Race-safe upsert: if two concurrent first-time reads land here, one wins
+  // the insert and the other's INSERT is skipped via ON CONFLICT. Either way
+  // we re-select and return the row.
+  await db
+    .insert(userSettings)
+    .values({ userId })
+    .onConflictDoNothing({ target: userSettings.userId });
+
+  const [row] = await db
     .select()
     .from(userSettings)
     .where(eq(userSettings.userId, userId))
     .limit(1);
-  if (existing.length > 0) return existing[0];
-
-  const [row] = await db
-    .insert(userSettings)
-    .values({ userId })
-    .returning();
   return row;
 }
 

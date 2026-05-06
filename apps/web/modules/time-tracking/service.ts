@@ -61,10 +61,19 @@ export async function getDailyTotals(
   to: Date,
   timezone: string
 ): Promise<DailyTotal[]> {
+  // Clamp the duration to [from, to) so a still-running entry that extends
+  // past `to` doesn't over-count, and a long entry that started before `from`
+  // is still bounded correctly. The WHERE filters by `start` only, so the
+  // clamp inside SUM is what does the actual time-bucket math.
   const result = await db.execute(sql`
     SELECT
       to_char(date_trunc('day', "start" AT TIME ZONE ${timezone}), 'YYYY-MM-DD') AS date,
-      SUM(EXTRACT(EPOCH FROM (COALESCE("stop", now()) - "start")) / 60)::int AS total_minutes
+      SUM(
+        EXTRACT(EPOCH FROM (
+          LEAST(COALESCE("stop", now()), ${to.toISOString()}::timestamp)
+          - GREATEST("start", ${from.toISOString()}::timestamp)
+        )) / 60
+      )::int AS total_minutes
     FROM time_entries
     WHERE user_id = ${userId}
       AND organization_id = ${organizationId}
@@ -211,9 +220,16 @@ export async function updateEntry(
     throw new InvalidTimeRangeError();
   }
 
-  // Overlap check uses now() as the running entry's effective end if stop is null.
-  const overlapEnd = newStop ?? new Date();
-  await assertNoOverlap(userId, organizationId, newStart, overlapEnd, id);
+  // Only re-check overlap when the time window actually changes. Editing
+  // description/tags on a running entry shouldn't trigger an overlap check
+  // against now() — that can spuriously fail if any historical entry was
+  // recorded during the running entry's window via a manual create.
+  const timeChanging = patch.start !== undefined || patch.stop !== undefined;
+  if (timeChanging) {
+    // Overlap check uses now() as the running entry's effective end if stop is null.
+    const overlapEnd = newStop ?? new Date();
+    await assertNoOverlap(userId, organizationId, newStart, overlapEnd, id);
+  }
 
   const updates: Record<string, unknown> = { updatedAt: new Date() };
   if (patch.start !== undefined) updates.start = patch.start;

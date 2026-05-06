@@ -13,6 +13,7 @@ import {
 import { USE_MOCK_TIME_DATA, getMockDailyTotals } from "../mocks/daily-totals";
 import { useUserTimezone } from "../hooks/useUserTimezone";
 import { useTranslations } from "next-intl";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface StatProps {
   label: string;
@@ -22,17 +23,19 @@ interface StatProps {
 
 function Stat({ label, value, hint }: StatProps) {
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </div>
-      <div className="mt-2 font-mono text-2xl font-medium tabular-nums">
-        {value}
-      </div>
-      {hint && (
-        <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
-      )}
-    </div>
+    <Card size="sm">
+      <CardContent>
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {label}
+        </div>
+        <div className="mt-2 font-mono text-2xl font-medium tabular-nums">
+          {value}
+        </div>
+        {hint && (
+          <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -58,32 +61,41 @@ export function StatsStrip() {
     ? getMockDailyTotals(sixtyAgo, today.to, tz)
     : data?.dailyTotals ?? [];
 
-  // Derive today's, week's, month's totals from the 60-day window so we make one query
-  const todayKey = new Intl.DateTimeFormat("en-CA", {
+  // Derive today's, week's, month's totals from the 60-day window so we make
+  // one query. Compare on YYYY-MM-DD strings *in the user's tz* — comparing
+  // ms since epoch ("date as UTC midnight" vs "tz-shifted local midnight")
+  // double-counts boundary days for non-zero offsets.
+  const tzDateFmt = new Intl.DateTimeFormat("en-CA", {
     timeZone: tz,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  });
+  const tzKey = (d: Date) => tzDateFmt.format(d);
+
+  const todayKey = tzKey(new Date());
+  // For [from, to) windows, the 'to' Date is exclusive — subtract a tick before
+  // formatting so the upper bound is the *last included day*, then compare with <=.
+  const weekFromKey = tzKey(week.from);
+  const weekLastKey = tzKey(new Date(week.to.getTime() - 1));
+  const monthFromKey = tzKey(month.from);
+  const monthLastKey = tzKey(new Date(month.to.getTime() - 1));
 
   const todayMinutes =
     rows.find((r) => r?.date === todayKey)?.totalMinutes ?? 0;
 
-  const weekFromMs = week.from.getTime();
-  const weekToMs = week.to.getTime();
-  const monthFromMs = month.from.getTime();
-  const monthToMs = month.to.getTime();
-
   const weekMinutes = rows.reduce((acc, r) => {
     if (!r?.date) return acc;
-    const d = new Date(`${r.date}T00:00:00Z`).getTime();
-    return d >= weekFromMs && d < weekToMs ? acc + (r.totalMinutes ?? 0) : acc;
+    return r.date >= weekFromKey && r.date <= weekLastKey
+      ? acc + (r.totalMinutes ?? 0)
+      : acc;
   }, 0);
 
   const monthMinutes = rows.reduce((acc, r) => {
     if (!r?.date) return acc;
-    const d = new Date(`${r.date}T00:00:00Z`).getTime();
-    return d >= monthFromMs && d < monthToMs ? acc + (r.totalMinutes ?? 0) : acc;
+    return r.date >= monthFromKey && r.date <= monthLastKey
+      ? acc + (r.totalMinutes ?? 0)
+      : acc;
   }, 0);
 
   // Current streak = consecutive days (counting back from yesterday, or today if today already hit goal)

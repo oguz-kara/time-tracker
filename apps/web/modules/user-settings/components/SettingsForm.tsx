@@ -1,20 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useGetUserSettingsQuery,
   useUpdateUserSettingsMutation,
 } from "@/lib/graphql/generated";
 import { useQueryClient } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { setLocaleAction } from "@/i18n/actions";
 import { locales, type Locale } from "@/i18n/config";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { invalidateTimeTrackingQueries } from "@/modules/time-tracking/utils/invalidate";
 
 const TIMEZONES =
   typeof Intl.supportedValuesOf === "function"
@@ -57,25 +79,33 @@ export function SettingsForm() {
 
   const update = useUpdateUserSettingsMutation({
     onSuccess: () => {
-      qc.invalidateQueries();
+      invalidateTimeTrackingQueries(qc);
       toast.success(t("saved"));
     },
     onError: (e: unknown) =>
       toast.error(e instanceof Error ? e.message : t("saveFailed")),
   });
 
-  if (isLoading) return <div className="h-32 animate-pulse rounded-md bg-muted" />;
+  const goalHint = useMemo(() => {
+    const h = Math.floor(goal / 60);
+    const m = goal % 60;
+    return `${h}h ${m}m`;
+  }, [goal]);
+
+  if (isLoading) return <Skeleton className="h-64 w-full max-w-md" />;
 
   return (
     <form
       className="max-w-md space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
+        // Goal/timezone/weekStartsOn → GraphQL mutation.
+        // Locale → server action (writes BOTH cookie and DB row, so we don't
+        // double-write here). Splitting avoids the race where a failed
+        // mutation would leave the cookie flipped to a locale never persisted.
         update.mutate({
-          input: { dailyGoalMinutes: goal, weekStartsOn, timezone, locale },
+          input: { dailyGoalMinutes: goal, weekStartsOn, timezone },
         });
-        // Sync the locale cookie + re-render the layout so the language flips
-        // immediately, even though the GraphQL mutation also persists to DB.
         startTransition(async () => {
           await setLocaleAction(locale);
           router.refresh();
@@ -84,58 +114,75 @@ export function SettingsForm() {
     >
       <div className="space-y-2">
         <Label htmlFor="goal">{t("dailyGoal")}</Label>
-        <Input
-          id="goal"
-          type="number"
-          min={1}
-          max={1440}
-          value={goal}
-          onChange={(e) => setGoal(Number(e.target.value))}
-        />
-        <p className="text-xs text-muted-foreground">
-          {Math.floor(goal / 60)}h {goal % 60}m
-        </p>
+        <InputGroup>
+          <InputGroupInput
+            id="goal"
+            type="number"
+            min={1}
+            max={1440}
+            value={goal}
+            onChange={(e) => setGoal(Number(e.target.value))}
+          />
+          <InputGroupText>min</InputGroupText>
+        </InputGroup>
+        <p className="text-xs text-muted-foreground">{goalHint}</p>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="week">{t("weekStartsOn")}</Label>
-        <select
-          id="week"
-          className="block w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground"
-          value={weekStartsOn}
-          onChange={(e) => setWeekStartsOn(Number(e.target.value) as 0 | 1)}
+        <Select
+          value={String(weekStartsOn)}
+          onValueChange={(v) => setWeekStartsOn(Number(v) as 0 | 1)}
         >
-          <option value={0}>{t("sunday")}</option>
-          <option value={1}>{t("monday")}</option>
-        </select>
+          <SelectTrigger id="week" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0">{t("sunday")}</SelectItem>
+            <SelectItem value="1">{t("monday")}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="tz">{t("timezone")}</Label>
-        <select
-          id="tz"
-          className="block w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground"
+        <Combobox
+          items={TIMEZONES}
           value={timezone}
-          onChange={(e) => setTimezone(e.target.value)}
+          onValueChange={(v) => typeof v === "string" && setTimezone(v)}
         >
-          {TIMEZONES.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz}
-            </option>
-          ))}
-        </select>
+          <ComboboxInput id="tz" placeholder={timezone} />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxEmpty>—</ComboboxEmpty>
+              {TIMEZONES.map((tz) => (
+                <ComboboxItem key={tz} value={tz}>
+                  {tz}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="locale">{t("language")}</Label>
-        <select
-          id="locale"
-          className="block w-full rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground"
+        <Select
           value={locale}
-          onChange={(e) => setLocale(e.target.value as Locale)}
+          onValueChange={(v) => setLocale(v as Locale)}
         >
-          <option value="en">{t("languageEn")}</option>
-          <option value="tr">{t("languageTr")}</option>
-        </select>
+          <SelectTrigger id="locale" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">{t("languageEn")}</SelectItem>
+            <SelectItem value="tr">{t("languageTr")}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
       <Button type="submit" disabled={update.isPending}>
+        {update.isPending && <Spinner className="mr-2 h-4 w-4" />}
         {tc("save")}
       </Button>
     </form>

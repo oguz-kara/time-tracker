@@ -18,7 +18,16 @@ import { useGetDailyTotalsQuery, useGetUserSettingsQuery } from "@/lib/graphql/g
 import { formatMinutes } from "../utils/format";
 import { USE_MOCK_TIME_DATA, getMockDailyTotals } from "../mocks/daily-totals";
 import { useUserTimezone } from "../hooks/useUserTimezone";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const chartConfig = {
   totalMinutes: {
@@ -66,6 +75,7 @@ function dateInTzToUtc(date: string, tz: string): Date {
 
 export function DailyTotalsChart({ days, title, description }: Props) {
   const tCharts = useTranslations("dashboard.charts");
+  const locale = useLocale();
   const { data: settingsData } = useGetUserSettingsQuery();
   const tz = useUserTimezone();
   const goal = settingsData?.userSettings?.dailyGoalMinutes ?? 480;
@@ -96,22 +106,22 @@ export function DailyTotalsChart({ days, title, description }: Props) {
   const showLoading = isLoading && !USE_MOCK_TIME_DATA;
 
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <div className="mb-4 flex items-baseline justify-between">
-        <div>
-          <h3 className="text-sm font-medium">{title}</h3>
+    <Card size="sm">
+      <CardHeader className="flex flex-row items-baseline justify-between space-y-0">
+        <div className="space-y-0.5">
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
           {description && (
-            <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+            <CardDescription className="text-xs">{description}</CardDescription>
           )}
         </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-[0.18em]">
           {tCharts("goal", { hours: Math.floor(goal / 60) })}
-        </div>
-      </div>
-
-      {showLoading ? (
-        <div className="h-[220px] animate-pulse rounded bg-muted" />
-      ) : (
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        {showLoading ? (
+          <Skeleton className="h-[220px] w-full" />
+        ) : (
         <ChartContainer config={chartConfig} className="h-[220px] w-full">
           <BarChart data={chartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="2 4" />
@@ -122,10 +132,14 @@ export function DailyTotalsChart({ days, title, description }: Props) {
               tickMargin={8}
               minTickGap={16}
               tickFormatter={(value: string) => {
-                // YYYY-MM-DD → "May 02"
-                const [, m, d] = value.split("-");
-                const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                return `${monthNames[Number(m) - 1]} ${d}`;
+                // YYYY-MM-DD → locale-aware "May 02" / "02 May" / "02 May" etc.
+                // Parse as local-noon to dodge tz boundary shifts.
+                const [y, m, d] = value.split("-").map(Number);
+                if (!y || !m || !d) return value;
+                return new Intl.DateTimeFormat(locale, {
+                  month: "short",
+                  day: "2-digit",
+                }).format(new Date(y, m - 1, d, 12));
               }}
               fontSize={10}
               stroke="hsl(var(--muted-foreground))"
@@ -147,13 +161,13 @@ export function DailyTotalsChart({ days, title, description }: Props) {
                 <ChartTooltipContent
                   labelFormatter={(label) => {
                     const value = String(label ?? "");
-                    const [y, m, d] = value.split("-");
+                    const [y, m, d] = value.split("-").map(Number);
                     if (!y || !m || !d) return value;
-                    return new Date(`${y}-${m}-${d}T00:00:00`).toLocaleDateString("en-US", {
+                    return new Intl.DateTimeFormat(locale, {
                       weekday: "short",
                       month: "short",
                       day: "numeric",
-                    });
+                    }).format(new Date(y, m - 1, d, 12));
                   }}
                   formatter={(value) => formatMinutes(Number(value))}
                 />
@@ -172,7 +186,8 @@ export function DailyTotalsChart({ days, title, description }: Props) {
             />
           </BarChart>
         </ChartContainer>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

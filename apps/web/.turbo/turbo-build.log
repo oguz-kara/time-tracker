@@ -1,0 +1,91 @@
+
+
+> @jetframe/web@0.1.0 build /Users/bussss/projects/time-tracker/apps/web
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   [1m[38;2;173;127;168m▲ Next.js 16.0.7[39m[22m (Turbopack)
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · clientTraceMetadata
+
+ [37m[1m [22m[39m Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ [32m[1m✓[22m[39m Compiled successfully in 9.8s
+[?25l [37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m.[39m[2K[1G [37m[1m [22m[39m Running next.config.js provided runAfterProductionCompile  [36m..[39m[2K[1G[?25h [32m[1m✓[22m[39m Completed runAfterProductionCompile in 886ms
+[?25l [36m.[39m [2K[1G[?25h[?25l [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G [37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[?25h[?25l [37m[1m [22m[39m Finished TypeScript in 8.0s  [36m.[39m[2K[1G[?25h [37m[1m [22m[39m Finished TypeScript in 8.0s     [32m[1m✓[22m[39m Finished TypeScript in 8.0s 
+[?25l [37m[1m [22m[39m Collecting page data using 7 workers  [36m.[39m[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2K[1G [37m[1m [22m[39m Collecting page data using 7 workers  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting page data using 7 workers  [36m...[39m[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[2K[1G [37m[1m [22m[39m Collecting page data using 7 workers  [36m.[39m[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[2K[1G [37m[1m [22m[39m Collecting page data using 7 workers  [36m..[39m[2K[1G [37m[1m [22m[39m Collecting page data using 7 workers  [36m...[39m[2K[1G[?25h [37m[1m [22m[39m Collecting page data using 7 workers in 1046.3ms     [32m[1m✓[22m[39m Collecting page data using 7 workers in 1046.3ms 
+[?25l [37m[1m [22m[39m Generating static pages using 7 workers (0/19)  [36m[    ][39m[2K[1G[?25h[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../../../../../../ROOT/apps/web/.env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+Error getting session: Error: Dynamic server usage: Route /login couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at x (.next/server/chunks/ssr/5ee56_next_5ae76a1e._.js:2:11804)
+    at m (.next/server/chunks/ssr/5ee56_next_5ae76a1e._.js:5:12735)
+    at jl (.next/server/chunks/ssr/_31ea4d9a._.js:392:70938)
+    at f (.next/server/chunks/ssr/[root-of-the-server]__baaf832d._.js:2:4084)
+    at stringify (<anonymous>) {
+  description: [32m"Route /login couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error getting session: Error: Dynamic server usage: Route /pricing couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at x (.next/server/chunks/ssr/5ee56_next_5ae76a1e._.js:2:11804)
+    at m (.next/server/chunks/ssr/5ee56_next_5ae76a1e._.js:5:12735)
+    at jl (.next/server/chunks/ssr/_31ea4d9a._.js:392:70938)
+    at i (.next/server/chunks/ssr/[root-of-the-server]__073c53aa._.js:2:7857)
+    at stringify (<anonymous>) {
+  description: [32m"Route /pricing couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error getting session: Error: Dynamic server usage: Route /pricing couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at x (.next/server/chunks/ssr/5ee56_next_5ae76a1e._.js:2:11804)
+    at m (.next/server/chunks/ssr/5ee56_next_5ae76a1e._.js:5:12735)
+    at jl (.next/server/chunks/ssr/_31ea4d9a._.js:392:70938)
+    at h (.next/server/chunks/ssr/[root-of-the-server]__073c53aa._.js:2:5355)
+    at stringify (<anonymous>) {
+  description: [32m"Route /pricing couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+[?25h [32m[1m✓[22m[39m Generating static pages using 7 workers (19/19) in 677.6ms
+[?25l [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G[?25h [37m[1m [22m[39m Finalizing page optimization in 11.8ms     [32m[1m✓[22m[39m Finalizing page optimization in 11.8ms 
+
+[4mRoute (app)[24m
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /admin
+├ ƒ /admin/monitoring
+├ ƒ /admin/organizations
+├ ƒ /admin/users
+├ ƒ /api/ai/chat
+├ ƒ /api/auth/[...all]
+├ ƒ /api/graphql
+├ ƒ /api/inngest
+├ ƒ /api/webhooks/stripe
+├ ƒ /billing
+├ ƒ /billing/success
+├ ƒ /dashboard
+├ ƒ /login
+├ ƒ /pricing
+├ ƒ /settings/tracking
+└ ƒ /track
+
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+
+[?25h

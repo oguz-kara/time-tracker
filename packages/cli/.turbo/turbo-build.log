@@ -1,0 +1,6 @@
+
+
+> @jetframe/cli@0.1.0 build /Users/bussss/projects/time-tracker/packages/cli
+> echo 'CLI uses tsx at runtime, no build needed'
+
+CLI uses tsx at runtime, no build needed

@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
 import {
   useCreateEntryMutation,
   useUpdateEntryMutation,
@@ -18,6 +20,7 @@ import {
 } from "@/lib/graphql/generated";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { invalidateTimeTrackingQueries } from "../utils/invalidate";
 import { toast } from "sonner";
 
 interface Props {
@@ -58,14 +61,14 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
 
   const create = useCreateEntryMutation({
     onSuccess: () => {
-      qc.invalidateQueries();
+      invalidateTimeTrackingQueries(qc);
       onOpenChange(false);
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : t("saveFailed")),
   });
   const update = useUpdateEntryMutation({
     onSuccess: () => {
-      qc.invalidateQueries();
+      invalidateTimeTrackingQueries(qc);
       onOpenChange(false);
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : t("saveFailed")),
@@ -119,8 +122,9 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">{t("description")}</Label>
-            <Input
+            <Textarea
               id="description"
+              rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -131,6 +135,9 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
             {tc("cancel")}
           </Button>
           <Button onClick={submit} disabled={create.isPending || update.isPending}>
+            {(create.isPending || update.isPending) && (
+              <Spinner className="mr-2 h-4 w-4" />
+            )}
             {tc("save")}
           </Button>
         </DialogFooter>

@@ -65,10 +65,29 @@ export function todayRange(timezone: string): { from: Date; to: Date } {
 
 /**
  * Range for the current week, anchored to weekStartsOn (0=Sun, 1=Mon).
+ *
+ * IMPORTANT: day-of-week is computed in the user's tz, not from the UTC
+ * instant of "tz-local midnight." Calling `getUTCDay()` on the latter would
+ * land on the previous calendar day for east-of-UTC zones (e.g. Istanbul
+ * Mon-midnight is Sun 21:00 UTC) and produce a week shifted by one day.
  */
 export function weekRange(timezone: string, weekStartsOn: 0 | 1): { from: Date; to: Date } {
   const { from: todayFrom } = todayRange(timezone);
-  const dayOfWeek = todayFrom.getUTCDay();
+  // Map IANA weekday short name to JS day index (0=Sun..6=Sat).
+  const weekdayToIdx: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  const weekdayShort = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    weekday: "short",
+  }).format(new Date());
+  const dayOfWeek = weekdayToIdx[weekdayShort] ?? 0;
   const diff = (dayOfWeek - weekStartsOn + 7) % 7;
   const from = new Date(todayFrom.getTime() - diff * 24 * 60 * 60 * 1000);
   const to = new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);

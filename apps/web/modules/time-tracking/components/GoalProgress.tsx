@@ -7,8 +7,11 @@ import {
   useGetCurrentEntryQuery,
 } from "@/lib/graphql/generated";
 import { useTranslations } from "next-intl";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { todayRange, formatMinutes } from "../utils/format";
 import { useUserTimezone } from "../hooks/useUserTimezone";
+import { cn } from "@/lib/utils";
 
 export function GoalProgress() {
   const t = useTranslations("track.goal");
@@ -37,26 +40,28 @@ export function GoalProgress() {
   const over = liveMinutes - goal;
 
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <div className="mb-3 flex items-baseline justify-between">
-        <span className="text-sm text-muted-foreground">{t("today")}</span>
-        <span className="font-mono text-sm tabular-nums">
-          {formatMinutes(liveMinutes)} / {formatMinutes(goal)}
-        </span>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-secondary">
-        <div
-          className={`h-full transition-all ${
-            over >= 0 ? "bg-emerald-500" : "bg-primary"
-          }`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      {over > 0 && (
-        <div className="mt-2 text-xs text-emerald-500">
-          +{t("overGoal", { minutes: formatMinutes(over) })}
+    <Card size="sm">
+      <CardContent>
+        <div className="mb-3 flex items-baseline justify-between">
+          <span className="text-sm text-muted-foreground">{t("today")}</span>
+          <span className="font-mono text-sm tabular-nums">
+            {formatMinutes(liveMinutes)} / {formatMinutes(goal)}
+          </span>
         </div>
-      )}
-    </div>
+        <Progress
+          value={pct}
+          className={cn(
+            "h-2",
+            over >= 0 &&
+              "[&_[data-slot=progress-indicator]]:bg-emerald-500"
+          )}
+        />
+        {over > 0 && (
+          <div className="mt-2 text-xs text-emerald-500">
+            +{t("overGoal", { minutes: formatMinutes(over) })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
