@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,17 +20,13 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { invalidateTimeTrackingQueries } from "../utils/invalidate";
+import { DateTimeField } from "./DateTimeField";
 import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   entry?: TimeEntryFieldsFragment | null;
-}
-
-function toLocalInput(d: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
@@ -41,20 +36,22 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
   const isEdit = !!entry;
   const isRunning = isEdit && entry?.stop == null;
 
-  const [start, setStart] = useState("");
-  const [stop, setStop] = useState("");
+  // Date objects, not strings. Lets us pass directly to mutations and to
+  // <DateTimeField> without parsing back and forth.
+  const [start, setStart] = useState<Date | null>(null);
+  const [stop, setStop] = useState<Date | null>(null);
   const [description, setDescription] = useState("");
 
   useEffect(() => {
     if (entry) {
-      setStart(entry.start ? toLocalInput(new Date(entry.start)) : "");
-      setStop(entry.stop ? toLocalInput(new Date(entry.stop)) : "");
+      setStart(entry.start ? new Date(entry.start) : null);
+      setStop(entry.stop ? new Date(entry.stop) : null);
       setDescription(entry.description ?? "");
     } else {
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60_000);
-      setStart(toLocalInput(oneHourAgo));
-      setStop(toLocalInput(now));
+      setStart(oneHourAgo);
+      setStop(now);
       setDescription("");
     }
   }, [entry?.id, open]);
@@ -75,13 +72,16 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
   });
 
   const submit = () => {
-    const startDate = new Date(start);
+    if (!start) {
+      toast.error(t("saveFailed"));
+      return;
+    }
     if (isEdit && entry?.id) {
       const patch: { start?: Date; stop?: Date; description?: string | null } = {
-        start: startDate,
+        start,
         description: description || null,
       };
-      if (!isRunning && stop) patch.stop = new Date(stop);
+      if (!isRunning && stop) patch.stop = stop;
       update.mutate({ id: entry.id, input: patch });
     } else if (!isEdit) {
       if (!stop) {
@@ -89,7 +89,7 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
         return;
       }
       create.mutate({
-        input: { start: startDate, stop: new Date(stop), description: description || null },
+        input: { start, stop, description: description || null },
       });
     }
   };
@@ -103,20 +103,18 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="start">{t("start")}</Label>
-            <Input
+            <DateTimeField
               id="start"
-              type="datetime-local"
               value={start}
-              onChange={(e) => setStart(e.target.value)}
+              onChange={setStart}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="stop">{isRunning ? t("stopRunning") : t("stop")}</Label>
-            <Input
+            <DateTimeField
               id="stop"
-              type="datetime-local"
               value={stop}
-              onChange={(e) => setStop(e.target.value)}
+              onChange={setStop}
               disabled={isRunning}
             />
           </div>

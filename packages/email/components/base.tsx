@@ -1,8 +1,10 @@
 /**
  * Base Email Layout Component
  *
- * Provides consistent branding, header, and footer across all email templates.
- * Uses React Email components for cross-client compatibility.
+ * Wraps every transactional email with a minimal wordmark header and footer.
+ * Kept deliberately plain — Gmail, Outlook, and Apple Mail all render plain
+ * HTML well; image-heavy headers tend to get clipped, blocked, or downloaded
+ * on tap. A typeset wordmark ships every time.
  */
 
 import * as React from "react";
@@ -13,24 +15,16 @@ import {
   Container,
   Section,
   Text,
-  Img,
 } from "@react-email/components";
 
 interface BaseLayoutProps {
-  /**
-   * Email content to be rendered inside the layout
-   */
   children?: React.ReactNode;
-
-  /**
-   * Preview text shown in email client inbox (optional)
-   */
+  /** Inbox preview text. Hidden in the body but shown in list views. */
   preview?: string;
 }
 
 export function BaseLayout({ children, preview }: BaseLayoutProps) {
   const currentYear = new Date().getFullYear();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   return (
     <Html>
@@ -50,27 +44,16 @@ export function BaseLayout({ children, preview }: BaseLayoutProps) {
       )}
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
-          {/* Header with Logo */}
+          {/* Wordmark — no image, no logo download */}
           <Section style={headerStyle}>
-            <Img
-              src={`${appUrl}/logo.png`}
-              width="120"
-              height="32"
-              alt="JetFrame"
-              style={{ margin: "0 auto" }}
-            />
+            <Text style={wordmarkStyle}>DenTracker</Text>
           </Section>
 
-          {/* Main Content */}
           {children as any}
 
-          {/* Footer */}
           <Section style={footerStyle}>
             <Text style={footerTextStyle}>
-              © {currentYear} JetFrame. All rights reserved.
-            </Text>
-            <Text style={footerTextStyle}>
-              You received this email because you signed up for JetFrame.
+              DenTracker · {currentYear}
             </Text>
           </Section>
         </Container>
@@ -79,7 +62,6 @@ export function BaseLayout({ children, preview }: BaseLayoutProps) {
   );
 }
 
-// Styles optimized for email client compatibility
 const bodyStyle = {
   backgroundColor: "#f6f9fc",
   fontFamily:
@@ -100,8 +82,16 @@ const headerStyle = {
   textAlign: "center" as const,
 };
 
+const wordmarkStyle = {
+  margin: 0,
+  fontSize: "16px",
+  fontWeight: 600,
+  letterSpacing: "-0.01em",
+  color: "#1a1a1a",
+};
+
 const footerStyle = {
-  padding: "32px 0 0",
+  padding: "24px 0 0",
   marginTop: "32px",
   textAlign: "center" as const,
   borderTop: "1px solid #e6ebf1",
@@ -111,5 +101,5 @@ const footerTextStyle = {
   color: "#8898aa",
   fontSize: "12px",
   lineHeight: "16px",
-  margin: "4px 0",
+  margin: 0,
 };

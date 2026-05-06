@@ -80,7 +80,7 @@ export function EntryList() {
 
   return (
     <Card size="sm">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b">
+      <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
         <CardTitle className="text-sm font-medium">{t("title")}</CardTitle>
         <Button size="sm" variant="outline" onClick={() => setCreating(true)}>
           <Plus className="mr-1 h-4 w-4" /> {t("addEntry")}

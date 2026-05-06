@@ -12,7 +12,12 @@ const config: CodegenConfig = {
       ],
       config: {
         fetcher: {
-          endpoint: 'http://localhost:3000/api/graphql',
+          // Relative URL so the request always hits the same origin the page
+          // was served from. Hardcoding localhost broke production; absolute
+          // production URLs would break local dev. Relative just works.
+          // Note: the plugin renders this as a TS expression, so we wrap it
+          // in extra quotes to emit a proper string literal in generated.ts.
+          endpoint: "'/api/graphql'",
           fetchParams: {
             headers: {
               'Content-Type': 'application/json',

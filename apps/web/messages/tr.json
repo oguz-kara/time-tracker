@@ -15,11 +15,11 @@
   },
   "landing": {
     "eyebrow": "Kişisel zaman takipçisi",
-    "headlineTop": "Sekiz saat.",
-    "headlineBottom": "Gerçekten çalışıldı.",
-    "subtitle": "Evden çalışınca gün bulanıklaşır — yemek, dışarı çıkma, hızlı bir sigara. Otururken başlat'a bas. Kalkarken durdur'a. Gerçekten kaç saat çalıştığını tek bakışta gör.",
-    "cta": "Takibe başla",
-    "footnote": "Tek kullanıcı · Analitik yok · Sihirli bağlantı ile giriş",
+    "headlineTop": "Bugün kaç saat",
+    "headlineBottom": "çalıştın?",
+    "subtitle": "Evden çalışırken gün bir türlü düzgün geçmiyor. Yemeğe çıkıyorsun, kahve molası bitmiyor, bir bakıyorsun akşam olmuş. Oturduğunda başlat, kalktığında durdur. DenTracker arka planda saatleri tutuyor; sen sadece sekiz saati doldurup doldurmadığına bakıyorsun.",
+    "cta": "Hemen başla",
+    "footnote": "Tek kişilik kullanım · Reklam ve takip yok · Sihirli bağlantıyla giriş",
     "footerYear": "Kişisel · 2026",
     "card": {
       "running": "Çalışıyor",

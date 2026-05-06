@@ -30,7 +30,7 @@ export type Incremental<T> =
 
 function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
   return async (): Promise<TData> => {
-    const res = await fetch("http://localhost:3000/api/graphql", {
+    const res = await fetch("/api/graphql" as string, {
       method: "POST",
       ...{
         headers: { "Content-Type": "application/json" },

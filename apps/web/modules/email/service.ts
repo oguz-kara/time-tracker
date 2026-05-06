@@ -34,7 +34,7 @@ export async function sendMagicLinkEmail(
       MagicLinkEmail({
         email,
         magicLink,
-        expiresIn: "15 minutes",
+        expiresIn: "15 dakika",
       })
     );
 
@@ -42,7 +42,7 @@ export async function sendMagicLinkEmail(
     const emailProvider = createEmailProvider();
     await emailProvider.send({
       to: email,
-      subject: "Sign in to JetFrame",
+      subject: "DenTracker giriş bağlantın",
       html,
       tags: [{ name: "type", value: "magic-link" }],
     });
