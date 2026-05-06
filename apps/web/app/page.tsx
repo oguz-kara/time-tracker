@@ -4,6 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { LandingHeader } from "@/components/layout/landing-header";
 import { LiveClock } from "@/components/landing/live-clock";
 
+// LandingHeader calls auth() → headers(), which Next 16 won't allow during
+// static prerender. Force this route to render per-request.
+export const dynamic = "force-dynamic";
+
 export default async function LandingPage() {
   const t = await getTranslations("landing");
   const tc = await getTranslations("common");

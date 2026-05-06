@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth";
 import { LoginForm } from "./login-form";
 import { RedirectMessage } from "./redirect-message";
 
+// auth() calls headers(), which Next 16 won't allow during static prerender.
+export const dynamic = "force-dynamic";
+
 /**
  * Login Page - Server Component
  *
