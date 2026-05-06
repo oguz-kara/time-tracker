@@ -5,7 +5,41 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "SENTRY_DSN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "SENTRY_AUTH_TOKEN",
+        "POSTHOG_KEY",
+        "SKIP_ENV_VALIDATION",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_APP_NAME",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "NEXT_PUBLIC_POSTHOG_KEY",
+        "NEXT_PUBLIC_POSTHOG_HOST",
+        "NEXT_PUBLIC_USE_MOCK_TIME_DATA",
+        "NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY",
+        "NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY",
+        "NEXT_PUBLIC_STRIPE_PRICE_ENTERPRISE_MONTHLY",
+        "NEXT_PUBLIC_STRIPE_PRICE_ENTERPRISE_YEARLY",
+        "NEXT_PUBLIC_STRIPE_PRICE_CREDITS_STARTER",
+        "NEXT_PUBLIC_STRIPE_PRICE_CREDITS_GROWTH",
+        "NEXT_PUBLIC_STRIPE_PRICE_CREDITS_SCALE"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
