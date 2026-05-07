@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
 
 /**
  * Login Form - Client Component
@@ -27,6 +28,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
  * - Form state and error handling
  */
 export function LoginForm() {
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -47,8 +49,8 @@ export function LoginForm() {
     try {
       await signOut();
       setShowSessionWarning(false);
-    } catch (err) {
-      setError("Failed to sign out. Please try again.");
+    } catch {
+      setError(t("signOutFailed"));
     }
   };
 
@@ -70,9 +72,7 @@ export function LoginForm() {
 
       setIsSent(true);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to send magic link"
-      );
+      setError(err instanceof Error ? err.message : t("sendFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +90,7 @@ export function LoginForm() {
       setError(
         err instanceof Error
           ? err.message
-          : `Failed to sign in with ${provider}`
+          : t("signInWithProviderFailed", { provider })
       );
     }
   };
@@ -104,16 +104,16 @@ export function LoginForm() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl">Check your email</CardTitle>
+            <CardTitle className="text-2xl">{t("checkEmailTitle")}</CardTitle>
             <CardDescription>
-              We sent a magic link to{" "}
-              <span className="font-semibold">{email}</span>
+              {t.rich("checkEmailDescription", {
+                email: () => <span className="font-semibold">{email}</span>,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-center text-xs text-muted-foreground">
-              Click the link in the email to sign in. The link expires in 15
-              minutes.
+              {t("checkEmailHint")}
             </p>
           </CardContent>
           <CardFooter>
@@ -125,7 +125,7 @@ export function LoginForm() {
                 setEmail("");
               }}
             >
-              Try another email
+              {t("tryAnotherEmail")}
             </Button>
           </CardFooter>
         </Card>
@@ -138,8 +138,8 @@ export function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
+          <CardTitle className="text-3xl">{t("welcome")}</CardTitle>
+          <CardDescription>{t("subtitle")}</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -155,17 +155,20 @@ export function LoginForm() {
             <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertDescription className="text-amber-900 dark:text-amber-100">
-                You're currently signed in as{" "}
-                <span className="font-semibold">{session.user.email}</span>.
+                {t.rich("sessionConflictPrefix", {
+                  email: () => (
+                    <span className="font-semibold">{session.user.email}</span>
+                  ),
+                })}
                 <br />
                 <Button
                   variant="link"
                   className="h-auto p-0 text-amber-900 dark:text-amber-100 underline"
                   onClick={handleSignOut}
                 >
-                  Sign out
+                  {t("sessionConflictAction")}
                 </Button>{" "}
-                to continue with a different account.
+                {t("sessionConflictSuffix")}
               </AlertDescription>
             </Alert>
           )}
@@ -173,7 +176,7 @@ export function LoginForm() {
           {/* Magic Link Form */}
           <form onSubmit={handleMagicLink} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">{t("emailLabel")}</Label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <Mail className="h-4 w-4 text-muted-foreground" />
@@ -184,7 +187,7 @@ export function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="you@example.com"
+                  placeholder={t("emailPlaceholder")}
                   className="pl-10"
                 />
               </div>
@@ -198,12 +201,12 @@ export function LoginForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Sending magic link...
+                  {t("sendingMagicLink")}
                 </>
               ) : (
                 <>
                   <Mail className="h-4 w-4" />
-                  Send magic link
+                  {t("sendMagicLink")}
                 </>
               )}
             </Button>
@@ -219,7 +222,7 @@ export function LoginForm() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
+                    {t("orContinueWith")}
                   </span>
                 </div>
               </div>
@@ -249,7 +252,7 @@ export function LoginForm() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                       />
                     </svg>
-                    Sign in with Google
+                    {t("signInWithGoogle")}
                   </Button>
                 )}
 
@@ -260,7 +263,7 @@ export function LoginForm() {
                     className="w-full"
                   >
                     <Github className="h-5 w-5" />
-                    Sign in with GitHub
+                    {t("signInWithGithub")}
                   </Button>
                 )}
               </div>
@@ -270,7 +273,7 @@ export function LoginForm() {
 
         <CardFooter>
           <p className="text-center text-xs text-muted-foreground w-full">
-            By signing in, you agree to our Terms of Service and Privacy Policy.
+            {t("termsFooter")}
           </p>
         </CardFooter>
       </Card>

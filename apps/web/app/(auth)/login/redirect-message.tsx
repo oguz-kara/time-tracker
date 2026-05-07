@@ -3,7 +3,13 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 /**
  * Redirect Message - Client Component
@@ -12,6 +18,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
  * This provides better UX than an instant redirect.
  */
 export function RedirectMessage({ email }: { email: string }) {
+  const t = useTranslations("auth");
   const router = useRouter();
 
   useEffect(() => {
@@ -30,13 +37,14 @@ export function RedirectMessage({ email }: { email: string }) {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
           </div>
-          <CardTitle className="text-2xl">Already signed in</CardTitle>
+          <CardTitle className="text-2xl">{t("alreadySignedIn")}</CardTitle>
           <CardDescription>
-            You're currently signed in as{" "}
-            <span className="font-semibold">{email}</span>
+            {t.rich("alreadySignedInDescription", {
+              email: () => <span className="font-semibold">{email}</span>,
+            })}
           </CardDescription>
           <CardDescription className="mt-2 text-sm">
-            Redirecting to dashboard...
+            {t("redirecting")}
           </CardDescription>
         </CardHeader>
       </Card>

@@ -3,9 +3,9 @@ export const saasConfig = {
   mode: "b2c" as "b2c" | "b2b",
 
   metadata: {
-    name: "JetFrame",
-    domain: "jetframe.io",
-    description: "The SaaS Factory - Build B2B SaaS in 14-day sprints",
+    name: "DenTracker",
+    domain: "dentracker.fun",
+    description: "Time tracking made simple for remote workers",
     logo: "/logo.svg",
   },
 
@@ -13,10 +13,9 @@ export const saasConfig = {
   features: {
     // Multi-tenancy: When false, users work in personal context (no teams UI)
     multiTenancy: false,
-
     auth: {
       social: {
-        google: true,
+        google: false,
         github: false,
         apple: false,
       },
@@ -174,10 +173,10 @@ export const saasConfig = {
   // Email Configuration
   email: {
     from: {
-      name: "JetFrame",
-      address: "noreply@jetframe.io",
+      name: "DenTracker",
+      address: "noreply@dentracker.fun",
     },
-    replyTo: "support@jetframe.io",
+    replyTo: "support@dentracker.fun",
   },
 
   // Limits & Rate Limiting

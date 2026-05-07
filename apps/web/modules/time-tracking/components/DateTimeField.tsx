@@ -3,6 +3,7 @@
 import * as React from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -34,8 +35,9 @@ export function DateTimeField({
   onChange,
   disabled,
   id,
-  placeholder = "Pick a date",
+  placeholder,
 }: Props) {
+  const tc = useTranslations("common");
   // Derive the time input's value (HH:mm) from `value`. If `value` is null,
   // fall back to "00:00" so the field is editable but the time is sensible.
   const timeString = React.useMemo(() => {
@@ -85,7 +87,11 @@ export function DateTimeField({
           }
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>{placeholder}</span>}
+          {value ? (
+            format(value, "PPP")
+          ) : (
+            <span>{placeholder ?? tc("pickDate")}</span>
+          )}
         </PopoverTrigger>
         <PopoverContent
           // Match the trigger's width via Base UI's anchor CSS variable.
@@ -112,7 +118,7 @@ export function DateTimeField({
         onChange={handleTimeChange}
         disabled={disabled}
         className="w-[120px]"
-        aria-label="Time"
+        aria-label={tc("aria.time")}
       />
     </div>
   );

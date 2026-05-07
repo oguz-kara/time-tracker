@@ -15,7 +15,7 @@ export async function LandingHeader() {
         <Link
           href="/"
           className="group flex items-center gap-2.5"
-          aria-label="DenTracker home"
+          aria-label={tc("aria.home")}
         >
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
             <Zap className="h-4 w-4 fill-current" strokeWidth={0} />

@@ -11,7 +11,38 @@
     "failed": "Failed",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "language": "Language"
+    "language": "Language",
+    "aria": {
+      "home": "DenTracker home",
+      "changeLanguage": "Change language",
+      "time": "Time"
+    },
+    "pickDate": "Pick a date"
+  },
+  "auth": {
+    "welcome": "Welcome back",
+    "subtitle": "Sign in to your account to continue",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "sendMagicLink": "Send magic link",
+    "sendingMagicLink": "Sending magic link…",
+    "sendFailed": "Failed to send magic link",
+    "checkEmailTitle": "Check your email",
+    "checkEmailDescription": "We sent a magic link to {email}",
+    "checkEmailHint": "Click the link in the email to sign in. The link expires in 15 minutes.",
+    "tryAnotherEmail": "Try another email",
+    "orContinueWith": "Or continue with",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithGithub": "Sign in with GitHub",
+    "signInWithProviderFailed": "Failed to sign in with {provider}",
+    "signOutFailed": "Failed to sign out. Please try again.",
+    "sessionConflictPrefix": "You are currently signed in as {email}.",
+    "sessionConflictAction": "Sign out",
+    "sessionConflictSuffix": "to continue with a different account.",
+    "termsFooter": "By signing in, you agree to our Terms of Service and Privacy Policy.",
+    "alreadySignedIn": "Already signed in",
+    "alreadySignedInDescription": "You're currently signed in as {email}",
+    "redirecting": "Redirecting to dashboard…"
   },
   "landing": {
     "eyebrow": "A personal time tracker",

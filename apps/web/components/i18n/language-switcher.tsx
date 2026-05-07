@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Languages } from "lucide-react";
 import {
@@ -31,6 +31,7 @@ interface Props {
 }
 
 export function LanguageSwitcher({ variant = "compact", className }: Props) {
+  const tc = useTranslations("common");
   const current = useLocale() as Locale;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -57,7 +58,7 @@ export function LanguageSwitcher({ variant = "compact", className }: Props) {
                 : "px-3 py-2 text-[13px] text-muted-foreground hover:text-foreground",
               className
             )}
-            aria-label="Change language"
+            aria-label={tc("aria.changeLanguage")}
           />
         }
       >

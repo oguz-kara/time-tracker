@@ -27,7 +27,7 @@ export function MagicLinkEmail({
 
         <Text style={paragraphStyle}>
           <strong>{email}</strong> adresine giriş yapmak için talepte bulundun.
-          Aşağıdaki düğmeye tıkla — bu kadar.
+          Aşağıdaki bağlantıya tıkla - bu kadar.
         </Text>
 
         <Section style={buttonContainerStyle}>
