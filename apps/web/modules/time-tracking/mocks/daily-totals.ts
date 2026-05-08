@@ -11,6 +11,7 @@
  */
 
 import type { DailyTotal, TimeEntry } from "../types";
+import { wallClockInTzToUtc } from "../utils/format";
 
 export const USE_MOCK_TIME_DATA =
   process.env.NEXT_PUBLIC_USE_MOCK_TIME_DATA === "1" || false;
@@ -39,48 +40,8 @@ function dateKey(daysAgo: number, tz: string): string {
   return fmt.format(new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000));
 }
 
-/**
- * Convert a wall-clock time in `tz` (e.g. "2026-05-02 09:00 in Europe/Istanbul")
- * to the corresponding UTC Date. DST-safe: we read the tz offset *for that
- * specific instant* via Intl, rather than guessing.
- */
-function wallClockInTzToUtc(
-  date: string,
-  hour: number,
-  minute: number,
-  tz: string
-): Date {
-  // First pass: interpret the wall clock as if it were UTC. This gives a
-  // candidate UTC instant that is wrong by exactly the tz offset.
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const candidate = new Date(`${date}T${pad(hour)}:${pad(minute)}:00Z`);
-
-  // Second pass: ask Intl what wall clock that candidate UTC instant
-  // corresponds to in `tz`, then compute the offset from desired wall clock.
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: tz,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(candidate);
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  const tzAsUtc = Date.UTC(
-    get("year"),
-    get("month") - 1,
-    get("day"),
-    get("hour"),
-    get("minute"),
-    get("second")
-  );
-  const offsetMs = tzAsUtc - candidate.getTime();
-
-  // Subtract the offset to get the UTC instant whose tz wall clock is exactly desired.
-  return new Date(candidate.getTime() - offsetMs);
-}
+// `wallClockInTzToUtc` lives in utils/format.ts so dayRange and the mock
+// layer share one DST-safe implementation. Imported below.
 
 /**
  * Fake daily-totals series shaped to look like a realistic working pattern:
@@ -189,6 +150,7 @@ export function getMockEntriesForDay(
       : [0.4 + r1 * 0.1, 0.25 + r2 * 0.1, 0.35 - (r1 + r2) * 0.1];
 
   const descriptions = ["deep work", "meeting", "email", "review", "focus block"];
+  const tagPool = ["coding", "meeting", "review", "email", "deep-work"];
 
   const out: TimeEntry[] = [];
   let cursorMs = dayStartUtc.getTime();
@@ -201,6 +163,13 @@ export function getMockEntriesForDay(
     // Gap between chunks (15-90 min, lunch-sized for the middle gap)
     const gapMin = idx === 0 ? Math.round(30 + r2 * 60) : Math.round(15 + r3 * 30);
 
+    // 1-2 deterministic tags per session, drawn from the pool. Same `date+idx`
+    // always yields the same tags so reloads don't shuffle.
+    const ti1 = Math.floor(seeded(`${date}@t1${idx}`) * tagPool.length);
+    const ti2 = Math.floor(seeded(`${date}@t2${idx}`) * tagPool.length);
+    const tags =
+      ti1 === ti2 ? [tagPool[ti1]!] : [tagPool[ti1]!, tagPool[ti2]!];
+
     out.push({
       id: `mock-${date}-${idx}`,
       userId: "mock",
@@ -208,7 +177,7 @@ export function getMockEntriesForDay(
       start,
       stop,
       description: descriptions[idx % descriptions.length] || null,
-      tags: [],
+      tags,
       createdAt: start,
       updatedAt: stop,
     });
@@ -217,6 +186,11 @@ export function getMockEntriesForDay(
   });
 
   return out;
+}
+
+/** Distinct tags used by the mock dataset, sorted. */
+export function getMockUserTags(): string[] {
+  return ["coding", "deep-work", "email", "meeting", "review"];
 }
 
 /** All mock entries within `[from, to)`. */

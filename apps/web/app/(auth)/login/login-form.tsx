@@ -106,9 +106,7 @@ export function LoginForm() {
             </div>
             <CardTitle className="text-2xl">{t("checkEmailTitle")}</CardTitle>
             <CardDescription>
-              {t.rich("checkEmailDescription", {
-                email: () => <span className="font-semibold">{email}</span>,
-              })}
+              {t("checkEmailDescription", { email })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -155,11 +153,7 @@ export function LoginForm() {
             <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertDescription className="text-amber-900 dark:text-amber-100">
-                {t.rich("sessionConflictPrefix", {
-                  email: () => (
-                    <span className="font-semibold">{session.user.email}</span>
-                  ),
-                })}
+                {t("sessionConflictPrefix", { email: session.user.email })}
                 <br />
                 <Button
                   variant="link"

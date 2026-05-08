@@ -41,26 +41,89 @@ function getTimezoneOffsetMinutes(date: Date, timezone: string): number {
 }
 
 /**
- * Compute today's [from, to) range in the user's timezone, as UTC Dates
- * suitable for SQL params.
+ * Convert a wall-clock moment in `tz` (e.g. "2026-05-02 09:00 in Europe/Istanbul")
+ * to the corresponding UTC Date. DST-safe: reads the tz offset *for that
+ * specific instant* via Intl rather than guessing.
+ *
+ * Used by `dayRange` (midnight bounds) and the mock layer (entry start times).
+ * Public so both can share — keeps tz arithmetic in one place.
  */
-export function todayRange(timezone: string): { from: Date; to: Date } {
-  const now = new Date();
-  const fmt = new Intl.DateTimeFormat("en-CA", {
+export function wallClockInTzToUtc(
+  date: string,
+  hour: number,
+  minute: number,
+  tz: string
+): Date {
+  // First pass: interpret the wall clock as if it were UTC. This gives a
+  // candidate UTC instant that is wrong by exactly the tz offset.
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const candidate = new Date(`${date}T${pad(hour)}:${pad(minute)}:00Z`);
+
+  // Second pass: ask Intl what wall clock that candidate UTC instant
+  // corresponds to in `tz`, then compute the offset from desired wall clock.
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(candidate);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  const tzAsUtc = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour"),
+    get("minute"),
+    get("second")
+  );
+  const offsetMs = tzAsUtc - candidate.getTime();
+
+  // Subtract the offset to get the UTC instant whose tz wall clock is exactly desired.
+  return new Date(candidate.getTime() - offsetMs);
+}
+
+/**
+ * Compute the [from, to) range for any calendar day in the user's timezone,
+ * returned as UTC Dates suitable for SQL params.
+ *
+ * `date` is interpreted as "the calendar day this Date falls on, in `timezone`."
+ * The time-of-day on `date` is ignored.
+ */
+export function dayRange(
+  date: Date,
+  timezone: string
+): { from: Date; to: Date } {
+  // Extract the calendar Y-M-D string in the user's tz first. This is the
+  // only piece of information we want from `date`; its time-of-day and the
+  // browser's local tz are irrelevant.
+  const dateKey = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  });
-  const parts = fmt.formatToParts(now);
-  const y = parts.find((p) => p.type === "year")!.value;
-  const m = parts.find((p) => p.type === "month")!.value;
-  const d = parts.find((p) => p.type === "day")!.value;
-  const localMidnight = new Date(`${y}-${m}-${d}T00:00:00`);
-  const offsetMinutes = getTimezoneOffsetMinutes(localMidnight, timezone);
-  const from = new Date(localMidnight.getTime() - offsetMinutes * 60_000);
+  }).format(date);
+
+  // Anchor "midnight in `timezone` on `dateKey`" as a real UTC instant via
+  // the DST-safe wall-clock conversion. Older versions of this function
+  // parsed the YYYY-MM-DD string as browser-local, which produced wrong
+  // windows when the server (or developer's machine) was in a tz different
+  // from the user's configured tz.
+  const from = wallClockInTzToUtc(dateKey, 0, 0, timezone);
   const to = new Date(from.getTime() + 24 * 60 * 60 * 1000);
   return { from, to };
+}
+
+/**
+ * [from, to) range for today in the user's timezone.
+ * Thin wrapper around `dayRange(new Date(), tz)` — kept for explicit intent
+ * at call sites that always mean "today."
+ */
+export function todayRange(timezone: string): { from: Date; to: Date } {
+  return dayRange(new Date(), timezone);
 }
 
 /**

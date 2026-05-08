@@ -39,9 +39,7 @@ export function RedirectMessage({ email }: { email: string }) {
           </div>
           <CardTitle className="text-2xl">{t("alreadySignedIn")}</CardTitle>
           <CardDescription>
-            {t.rich("alreadySignedInDescription", {
-              email: () => <span className="font-semibold">{email}</span>,
-            })}
+            {t("alreadySignedInDescription", { email })}
           </CardDescription>
           <CardDescription className="mt-2 text-sm">
             {t("redirecting")}

@@ -38,3 +38,9 @@ export const GET_DAILY_TOTALS = gql`
     }
   }
 `;
+
+export const GET_USER_TAGS = gql`
+  query GetUserTags {
+    userTags
+  }
+`;

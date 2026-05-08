@@ -10,6 +10,7 @@ const TIME_TRACKING_KEY_PREFIXES = [
   "GetEntries",
   "GetDailyTotals",
   "GetUserSettings",
+  "GetUserTags",
 ] as const;
 
 /**

@@ -107,6 +107,19 @@ builder.queryField("dailyTotals", (t) =>
   })
 );
 
+builder.queryField("userTags", (t) =>
+  t.field({
+    type: ["String"],
+    resolve: async (_, __, ctx) => {
+      if (!ctx.session) throw new NotAuthenticatedError();
+      return service.listUserTags(
+        ctx.session.userId,
+        ctx.session.activeOrganizationId
+      );
+    },
+  })
+);
+
 // ---- Mutations ----
 
 builder.mutationField("startTimer", (t) =>

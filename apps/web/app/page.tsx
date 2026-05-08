@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -5,6 +6,16 @@ import { LandingHeader } from "@/components/layout/landing-header";
 import { LiveClock } from "@/components/landing/live-clock";
 
 export const dynamic = "force-dynamic";
+
+// Landing page uses the root metadata `title.default` — the only override
+// here is a richer description tuned for search-result CTR.
+export const metadata: Metadata = {
+  description:
+    "Evden çalışırken günün nasıl geçtiğini bilmek istersin. DenTracker; başlat–durdur, mola sayısı ve günlük 8 saat hedefi. Reklam yok, ücretsiz.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default async function LandingPage() {
   const t = await getTranslations("landing");

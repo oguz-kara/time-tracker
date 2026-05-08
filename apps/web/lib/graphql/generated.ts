@@ -414,6 +414,7 @@ export type Query = {
   unreadNotificationCount?: Maybe<UnreadCount>;
   userOrganizations?: Maybe<Array<Organization>>;
   userSettings?: Maybe<UserSettings>;
+  userTags?: Maybe<Array<Scalars["String"]["output"]>>;
 };
 
 export type QueryAdminOrganizationsArgs = {
@@ -1149,6 +1150,13 @@ export type GetDailyTotalsQuery = {
     date?: string | null;
     totalMinutes?: number | null;
   }> | null;
+};
+
+export type GetUserTagsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetUserTagsQuery = {
+  __typename?: "Query";
+  userTags?: Array<string> | null;
 };
 
 export type UpdateUserSettingsMutationVariables = Exact<{
@@ -3552,6 +3560,81 @@ useInfiniteGetDailyTotalsQuery.getKey = (
 useGetDailyTotalsQuery.fetcher = (variables: GetDailyTotalsQueryVariables) =>
   fetcher<GetDailyTotalsQuery, GetDailyTotalsQueryVariables>(
     GetDailyTotalsDocument,
+    variables,
+  );
+
+export const GetUserTagsDocument = `
+    query GetUserTags {
+  userTags
+}
+    `;
+
+export const useGetUserTagsQuery = <TData = GetUserTagsQuery, TError = unknown>(
+  variables?: GetUserTagsQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetUserTagsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<GetUserTagsQuery, TError, TData>["queryKey"];
+  },
+) => {
+  return useQuery<GetUserTagsQuery, TError, TData>({
+    queryKey:
+      variables === undefined ? ["GetUserTags"] : ["GetUserTags", variables],
+    queryFn: fetcher<GetUserTagsQuery, GetUserTagsQueryVariables>(
+      GetUserTagsDocument,
+      variables,
+    ),
+    ...options,
+  });
+};
+
+useGetUserTagsQuery.getKey = (variables?: GetUserTagsQueryVariables) =>
+  variables === undefined ? ["GetUserTags"] : ["GetUserTags", variables];
+
+export const useInfiniteGetUserTagsQuery = <
+  TData = InfiniteData<GetUserTagsQuery>,
+  TError = unknown,
+>(
+  variables: GetUserTagsQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetUserTagsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetUserTagsQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetUserTagsQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey:
+          (optionsQueryKey ?? variables === undefined)
+            ? ["GetUserTags.infinite"]
+            : ["GetUserTags.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetUserTagsQuery, GetUserTagsQueryVariables>(
+            GetUserTagsDocument,
+            { ...variables, ...(metaData.pageParam ?? {}) },
+          )(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetUserTagsQuery.getKey = (variables?: GetUserTagsQueryVariables) =>
+  variables === undefined
+    ? ["GetUserTags.infinite"]
+    : ["GetUserTags.infinite", variables];
+
+useGetUserTagsQuery.fetcher = (variables?: GetUserTagsQueryVariables) =>
+  fetcher<GetUserTagsQuery, GetUserTagsQueryVariables>(
+    GetUserTagsDocument,
     variables,
   );
 

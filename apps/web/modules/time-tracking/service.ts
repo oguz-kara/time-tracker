@@ -34,6 +34,32 @@ export async function getCurrentEntry(
   return rows[0] ?? null;
 }
 
+/**
+ * Distinct list of tags the user has ever applied to any of their entries
+ * (within the active org), sorted alphabetically. Used for the tag filter
+ * dropdown and the chip-input autocomplete in the entry editor.
+ *
+ * Implementation note: tags is a `text[]` column. `unnest()` produces one
+ * row per array element. `array_length(tags, 1) > 0` short-circuits empty
+ * arrays so they don't enter the unnest at all (they would yield zero rows
+ * anyway, but the filter keeps the plan tighter).
+ */
+export async function listUserTags(
+  userId: string,
+  organizationId: string
+): Promise<string[]> {
+  const result = await db.execute(sql`
+    SELECT DISTINCT unnest(tags) AS tag
+    FROM time_entries
+    WHERE user_id = ${userId}
+      AND organization_id = ${organizationId}
+      AND array_length(tags, 1) > 0
+    ORDER BY 1
+  `);
+  const rows = result as unknown as Array<{ tag: string }>;
+  return rows.map((r) => r.tag);
+}
+
 export async function listEntries(
   userId: string,
   organizationId: string,

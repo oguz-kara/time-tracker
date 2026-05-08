@@ -15,7 +15,10 @@
     "aria": {
       "home": "DenTracker home",
       "changeLanguage": "Change language",
-      "time": "Time"
+      "time": "Time",
+      "prevDay": "Previous day",
+      "nextDay": "Next day",
+      "removeTag": "Remove tag {tag}"
     },
     "pickDate": "Pick a date"
   },
@@ -64,6 +67,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "track": "Track",
+    "history": "History",
     "preferences": "Preferences",
     "settingsSection": "Settings"
   },
@@ -80,6 +84,19 @@
       "today": "Today",
       "overGoal": "{minutes} over goal"
     },
+    "workday": {
+      "title": "Workday",
+      "worked": "Worked",
+      "breaks": "Breaks",
+      "window": "Window",
+      "noEntries": "No entries yet — start the timer to open your workday."
+    },
+    "tags": {
+      "label": "Tags",
+      "addPlaceholder": "Add tag…",
+      "filter": "Filter by tag",
+      "all": "All tags"
+    },
     "entries": {
       "title": "Today's entries",
       "addEntry": "Add entry",
@@ -87,7 +104,14 @@
       "now": "now",
       "deleteConfirmTitle": "Delete this entry?",
       "deleteConfirmDescription": "This cannot be undone.",
-      "noDescription": "—"
+      "noDescription": "—",
+      "headers": {
+        "time": "Time",
+        "duration": "Duration",
+        "description": "Description",
+        "tags": "Tags",
+        "actions": "Actions"
+      }
     },
     "totals": {
       "thisWeek": "This week",
@@ -141,5 +165,13 @@
     "languageTr": "Türkçe",
     "saveFailed": "Failed",
     "saved": "Settings saved"
+  },
+  "history": {
+    "title": "History",
+    "today": "Today",
+    "backToToday": "Go to today",
+    "entriesFor": "Entries for {date}",
+    "noEntries": "No entries for this day.",
+    "viewingToday": "You're viewing today — switch to Track to start a timer."
   }
 }

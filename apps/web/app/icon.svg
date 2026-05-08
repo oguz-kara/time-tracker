@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Neon Lime tile, matches in-app logo (bg-primary text-primary-foreground) -->
+  <rect width="32" height="32" rx="6" fill="#e4f222"/>
+  <!-- Lightning bolt, lucide-style, scaled to 18px and centered -->
+  <path
+    d="M18 4 L8 18 L14 18 L14 28 L24 14 L18 14 Z"
+    fill="#08090a"
+    stroke="#08090a"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+</svg>

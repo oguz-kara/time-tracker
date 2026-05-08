@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { LoginForm } from "./login-form";
 import { RedirectMessage } from "./redirect-message";
 
 // auth() calls headers(), which Next 16 won't allow during static prerender.
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Giriş",
+  description:
+    "DenTracker'a sihirli bağlantı ile giriş yap — şifre yok, sadece e-posta. Hesabın yoksa link ilk girişte oluşturur.",
+  robots: {
+    // Auth pages are not useful in search results.
+    index: false,
+    follow: false,
+  },
+};
 
 /**
  * Login Page - Server Component

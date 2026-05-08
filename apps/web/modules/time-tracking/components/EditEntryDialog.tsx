@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
+import { TagChipInput } from "./TagChipInput";
 import {
   useCreateEntryMutation,
   useUpdateEntryMutation,
@@ -32,6 +33,7 @@ interface Props {
 export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
   const t = useTranslations("track.dialog");
   const tc = useTranslations("common");
+  const tTags = useTranslations("track.tags");
   const qc = useQueryClient();
   const isEdit = !!entry;
   const isRunning = isEdit && entry?.stop == null;
@@ -41,18 +43,21 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
   const [start, setStart] = useState<Date | null>(null);
   const [stop, setStop] = useState<Date | null>(null);
   const [description, setDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (entry) {
       setStart(entry.start ? new Date(entry.start) : null);
       setStop(entry.stop ? new Date(entry.stop) : null);
       setDescription(entry.description ?? "");
+      setTags((entry.tags ?? []).filter((t): t is string => !!t));
     } else {
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60_000);
       setStart(oneHourAgo);
       setStop(now);
       setDescription("");
+      setTags([]);
     }
   }, [entry?.id, open]);
 
@@ -77,9 +82,15 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
       return;
     }
     if (isEdit && entry?.id) {
-      const patch: { start?: Date; stop?: Date; description?: string | null } = {
+      const patch: {
+        start?: Date;
+        stop?: Date;
+        description?: string | null;
+        tags?: string[];
+      } = {
         start,
         description: description || null,
+        tags,
       };
       if (!isRunning && stop) patch.stop = stop;
       update.mutate({ id: entry.id, input: patch });
@@ -89,7 +100,7 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
         return;
       }
       create.mutate({
-        input: { start, stop, description: description || null },
+        input: { start, stop, description: description || null, tags },
       });
     }
   };
@@ -126,6 +137,10 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tags">{tTags("label")}</Label>
+            <TagChipInput id="tags" value={tags} onChange={setTags} />
           </div>
         </div>
         <DialogFooter>
