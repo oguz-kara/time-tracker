@@ -10,7 +10,7 @@
  * reloads don't reshuffle the bars and the streak/stats are stable.
  */
 
-import type { DailyTotal, TimeEntry } from "../types";
+import type { DailyTotal, TimeEntry, TagTotal } from "../types";
 import { wallClockInTzToUtc } from "../utils/format";
 
 export const USE_MOCK_TIME_DATA =
@@ -191,6 +191,53 @@ export function getMockEntriesForDay(
 /** Distinct tags used by the mock dataset, sorted. */
 export function getMockUserTags(): string[] {
   return ["coding", "deep-work", "email", "meeting", "review"];
+}
+
+/**
+ * Mock per-tag totals for the window. Synthesizes from `getMockEntries`:
+ * an entry with N tags contributes its full duration to each of those N
+ * tags (matches the SQL `LATERAL unnest` semantics). Sorted desc.
+ *
+ * The mock generator always assigns at least one tag to each session, so
+ * the "(untagged)" bucket usually doesn't appear — but we still compute it
+ * for parity in case the dataset ever changes.
+ */
+export function getMockTagTotals(
+  from: Date,
+  to: Date,
+  tz: string
+): TagTotal[] {
+  const entries = getMockEntries(from, to, tz);
+  const totals = new Map<string, number>();
+  const nowMs = Date.now();
+  const fromMs = from.getTime();
+  const toMs = to.getTime();
+
+  for (const e of entries) {
+    const startMs = new Date(e.start).getTime();
+    const stopMs = e.stop ? new Date(e.stop).getTime() : nowMs;
+    // Same clamping as the SQL.
+    const minutes = Math.max(
+      0,
+      (Math.min(stopMs, toMs) - Math.max(startMs, fromMs)) / 60_000
+    );
+    if (minutes <= 0) continue;
+    if (!e.tags || e.tags.length === 0) {
+      totals.set("(untagged)", (totals.get("(untagged)") ?? 0) + minutes);
+    } else {
+      for (const tag of e.tags) {
+        totals.set(tag, (totals.get(tag) ?? 0) + minutes);
+      }
+    }
+  }
+
+  return Array.from(totals.entries())
+    .map(([tag, totalMinutes]) => ({
+      tag,
+      totalMinutes: Math.round(totalMinutes),
+    }))
+    .filter((r) => r.totalMinutes > 0)
+    .sort((a, b) => b.totalMinutes - a.totalMinutes);
 }
 
 /** All mock entries within `[from, to)`. */

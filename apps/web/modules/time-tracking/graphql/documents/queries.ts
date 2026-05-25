@@ -44,3 +44,12 @@ export const GET_USER_TAGS = gql`
     userTags
   }
 `;
+
+export const GET_TAG_TOTALS = gql`
+  query GetTagTotals($from: DateTime!, $to: DateTime!) {
+    tagTotals(from: $from, to: $to) {
+      tag
+      totalMinutes
+    }
+  }
+`;

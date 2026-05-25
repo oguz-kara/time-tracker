@@ -18,6 +18,8 @@
       "time": "Time",
       "prevDay": "Previous day",
       "nextDay": "Next day",
+      "prevPeriod": "Previous period",
+      "nextPeriod": "Next period",
       "removeTag": "Remove tag {tag}"
     },
     "pickDate": "Pick a date"
@@ -150,7 +152,22 @@
       "thirtySub": "Daily hours worked, with goal line.",
       "weekTitle": "This week",
       "weekSub": "Day by day.",
-      "goal": "goal {hours}h"
+      "rangeTitle": "Daily hours",
+      "rangeSub": "Hours worked per day, with goal line.",
+      "rangeTitleTagged": "Daily hours · {tag}",
+      "rangeSubTagged": "Hours worked per day on this tag.",
+      "goal": "goal {hours}h",
+      "total": "Total"
+    },
+    "nav": {
+      "week": "Week",
+      "month": "Month"
+    },
+    "tagBreakdown": {
+      "title": "Time by tag",
+      "sub": "Click a tag to filter the chart above.",
+      "untagged": "Untagged",
+      "noData": "No tagged time in this range."
     }
   },
   "settings": {

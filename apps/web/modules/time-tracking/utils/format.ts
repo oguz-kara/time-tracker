@@ -126,58 +126,97 @@ export function todayRange(timezone: string): { from: Date; to: Date } {
   return dayRange(new Date(), timezone);
 }
 
+/** Granularity options for `periodRange`. Week and month for v1. */
+export type Granularity = "week" | "month";
+
+// Map IANA weekday short name to JS day index (0=Sun..6=Sat).
+const WEEKDAY_TO_IDX: Record<string, number> = {
+  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+};
+
 /**
- * Range for the current week, anchored to weekStartsOn (0=Sun, 1=Mon).
+ * Week range containing `anchor` in `timezone`, with `weekStartsOn` defining
+ * the first day of the week (0=Sun, 1=Mon).
  *
  * IMPORTANT: day-of-week is computed in the user's tz, not from the UTC
  * instant of "tz-local midnight." Calling `getUTCDay()` on the latter would
  * land on the previous calendar day for east-of-UTC zones (e.g. Istanbul
  * Mon-midnight is Sun 21:00 UTC) and produce a week shifted by one day.
  */
-export function weekRange(timezone: string, weekStartsOn: 0 | 1): { from: Date; to: Date } {
-  const { from: todayFrom } = todayRange(timezone);
-  // Map IANA weekday short name to JS day index (0=Sun..6=Sat).
-  const weekdayToIdx: Record<string, number> = {
-    Sun: 0,
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-  };
+function weekRangeFor(
+  anchor: Date,
+  timezone: string,
+  weekStartsOn: 0 | 1
+): { from: Date; to: Date } {
+  const { from: anchorDayFrom } = dayRange(anchor, timezone);
   const weekdayShort = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     weekday: "short",
-  }).format(new Date());
-  const dayOfWeek = weekdayToIdx[weekdayShort] ?? 0;
+  }).format(anchor);
+  const dayOfWeek = WEEKDAY_TO_IDX[weekdayShort] ?? 0;
   const diff = (dayOfWeek - weekStartsOn + 7) % 7;
-  const from = new Date(todayFrom.getTime() - diff * 24 * 60 * 60 * 1000);
+  const from = new Date(anchorDayFrom.getTime() - diff * 24 * 60 * 60 * 1000);
   const to = new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);
   return { from, to };
 }
 
 /**
- * Range for the current month in the user's tz.
+ * Month range containing `anchor` in `timezone`. Uses `wallClockInTzToUtc`
+ * for the boundary instants, which is DST-safe even at month edges.
  */
-export function monthRange(timezone: string): { from: Date; to: Date } {
-  const now = new Date();
-  const fmt = new Intl.DateTimeFormat("en-CA", {
+function monthRangeFor(
+  anchor: Date,
+  timezone: string
+): { from: Date; to: Date } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
     year: "numeric",
     month: "2-digit",
-  });
-  const parts = fmt.formatToParts(now);
+  }).formatToParts(anchor);
   const y = Number(parts.find((p) => p.type === "year")!.value);
   const m = Number(parts.find((p) => p.type === "month")!.value);
-  const firstLocal = new Date(`${y}-${String(m).padStart(2, "0")}-01T00:00:00`);
-  const offsetMinutes = getTimezoneOffsetMinutes(firstLocal, timezone);
-  const from = new Date(firstLocal.getTime() - offsetMinutes * 60_000);
-  const nextMonth = m === 12 ? { y: y + 1, m: 1 } : { y, m: m + 1 };
-  const nextFirstLocal = new Date(
-    `${nextMonth.y}-${String(nextMonth.m).padStart(2, "0")}-01T00:00:00`
+
+  const from = wallClockInTzToUtc(
+    `${y}-${String(m).padStart(2, "0")}-01`,
+    0,
+    0,
+    timezone
   );
-  const nextOffset = getTimezoneOffsetMinutes(nextFirstLocal, timezone);
-  const to = new Date(nextFirstLocal.getTime() - nextOffset * 60_000);
+  const next = m === 12 ? { y: y + 1, m: 1 } : { y, m: m + 1 };
+  const to = wallClockInTzToUtc(
+    `${next.y}-${String(next.m).padStart(2, "0")}-01`,
+    0,
+    0,
+    timezone
+  );
   return { from, to };
+}
+
+/**
+ * [from, to) range for the period containing `anchor`. The dashboard uses
+ * this for navigable week/month windows; `weekRange`/`monthRange` are thin
+ * wrappers for "the current period" callers.
+ */
+export function periodRange(
+  granularity: Granularity,
+  anchor: Date,
+  timezone: string,
+  weekStartsOn: 0 | 1
+): { from: Date; to: Date } {
+  return granularity === "month"
+    ? monthRangeFor(anchor, timezone)
+    : weekRangeFor(anchor, timezone, weekStartsOn);
+}
+
+/** Range for the current week, anchored to `weekStartsOn` (0=Sun, 1=Mon). */
+export function weekRange(
+  timezone: string,
+  weekStartsOn: 0 | 1
+): { from: Date; to: Date } {
+  return weekRangeFor(new Date(), timezone, weekStartsOn);
+}
+
+/** Range for the current month in the user's tz. */
+export function monthRange(timezone: string): { from: Date; to: Date } {
+  return monthRangeFor(new Date(), timezone);
 }

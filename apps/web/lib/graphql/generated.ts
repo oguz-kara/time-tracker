@@ -409,6 +409,7 @@ export type Query = {
   notifications?: Maybe<Array<Notification>>;
   project?: Maybe<Project>;
   projects?: Maybe<Array<Project>>;
+  tagTotals?: Maybe<Array<TagTotal>>;
   task?: Maybe<Task>;
   tasks?: Maybe<Array<Task>>;
   unreadNotificationCount?: Maybe<UnreadCount>;
@@ -455,6 +456,11 @@ export type QueryProjectArgs = {
   id: Scalars["String"]["input"];
 };
 
+export type QueryTagTotalsArgs = {
+  from: Scalars["DateTime"]["input"];
+  to: Scalars["DateTime"]["input"];
+};
+
 export type QueryTaskArgs = {
   id: Scalars["String"]["input"];
 };
@@ -492,6 +498,12 @@ export enum SubscriptionStatus {
   PastDue = "past_due",
   Trialing = "trialing",
 }
+
+export type TagTotal = {
+  __typename?: "TagTotal";
+  tag?: Maybe<Scalars["String"]["output"]>;
+  totalMinutes?: Maybe<Scalars["Int"]["output"]>;
+};
 
 export type Task = {
   __typename?: "Task";
@@ -1157,6 +1169,20 @@ export type GetUserTagsQueryVariables = Exact<{ [key: string]: never }>;
 export type GetUserTagsQuery = {
   __typename?: "Query";
   userTags?: Array<string> | null;
+};
+
+export type GetTagTotalsQueryVariables = Exact<{
+  from: Scalars["DateTime"]["input"];
+  to: Scalars["DateTime"]["input"];
+}>;
+
+export type GetTagTotalsQuery = {
+  __typename?: "Query";
+  tagTotals?: Array<{
+    __typename?: "TagTotal";
+    tag?: string | null;
+    totalMinutes?: number | null;
+  }> | null;
 };
 
 export type UpdateUserSettingsMutationVariables = Exact<{
@@ -3635,6 +3661,84 @@ useInfiniteGetUserTagsQuery.getKey = (variables?: GetUserTagsQueryVariables) =>
 useGetUserTagsQuery.fetcher = (variables?: GetUserTagsQueryVariables) =>
   fetcher<GetUserTagsQuery, GetUserTagsQueryVariables>(
     GetUserTagsDocument,
+    variables,
+  );
+
+export const GetTagTotalsDocument = `
+    query GetTagTotals($from: DateTime!, $to: DateTime!) {
+  tagTotals(from: $from, to: $to) {
+    tag
+    totalMinutes
+  }
+}
+    `;
+
+export const useGetTagTotalsQuery = <
+  TData = GetTagTotalsQuery,
+  TError = unknown,
+>(
+  variables: GetTagTotalsQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetTagTotalsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<GetTagTotalsQuery, TError, TData>["queryKey"];
+  },
+) => {
+  return useQuery<GetTagTotalsQuery, TError, TData>({
+    queryKey: ["GetTagTotals", variables],
+    queryFn: fetcher<GetTagTotalsQuery, GetTagTotalsQueryVariables>(
+      GetTagTotalsDocument,
+      variables,
+    ),
+    ...options,
+  });
+};
+
+useGetTagTotalsQuery.getKey = (variables: GetTagTotalsQueryVariables) => [
+  "GetTagTotals",
+  variables,
+];
+
+export const useInfiniteGetTagTotalsQuery = <
+  TData = InfiniteData<GetTagTotalsQuery>,
+  TError = unknown,
+>(
+  variables: GetTagTotalsQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetTagTotalsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetTagTotalsQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetTagTotalsQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey: optionsQueryKey ?? ["GetTagTotals.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetTagTotalsQuery, GetTagTotalsQueryVariables>(
+            GetTagTotalsDocument,
+            { ...variables, ...(metaData.pageParam ?? {}) },
+          )(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetTagTotalsQuery.getKey = (
+  variables: GetTagTotalsQueryVariables,
+) => ["GetTagTotals.infinite", variables];
+
+useGetTagTotalsQuery.fetcher = (variables: GetTagTotalsQueryVariables) =>
+  fetcher<GetTagTotalsQuery, GetTagTotalsQueryVariables>(
+    GetTagTotalsDocument,
     variables,
   );
 

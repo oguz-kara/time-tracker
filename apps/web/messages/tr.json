@@ -18,6 +18,8 @@
       "time": "Saat",
       "prevDay": "Önceki gün",
       "nextDay": "Sonraki gün",
+      "prevPeriod": "Önceki dönem",
+      "nextPeriod": "Sonraki dönem",
       "removeTag": "{tag} etiketini kaldır"
     },
     "pickDate": "Tarih seç"
@@ -150,7 +152,22 @@
       "thirtySub": "Günlük çalışma saatleri, hedef çizgisiyle.",
       "weekTitle": "Bu hafta",
       "weekSub": "Gün gün.",
-      "goal": "hedef {hours}sa"
+      "rangeTitle": "Günlük saatler",
+      "rangeSub": "Günlük çalışma saatleri, hedef çizgisiyle.",
+      "rangeTitleTagged": "Günlük saatler · {tag}",
+      "rangeSubTagged": "Bu etikette günlük çalışma saatleri.",
+      "goal": "hedef {hours}sa",
+      "total": "Toplam"
+    },
+    "nav": {
+      "week": "Hafta",
+      "month": "Ay"
+    },
+    "tagBreakdown": {
+      "title": "Etikete göre süre",
+      "sub": "Üstteki grafiği filtrelemek için bir etikete tıkla.",
+      "untagged": "Etiketsiz",
+      "noData": "Bu aralıkta etiketli süre yok."
     }
   },
   "settings": {

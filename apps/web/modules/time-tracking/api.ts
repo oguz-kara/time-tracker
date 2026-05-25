@@ -1,7 +1,7 @@
 import { builder } from "@/lib/graphql/builder";
 import * as service from "./service";
 import { NotAuthenticatedError } from "@/modules/shared/errors";
-import type { TimeEntry, DailyTotal } from "./types";
+import type { TimeEntry, DailyTotal, TagTotal } from "./types";
 import * as userSettingsService from "@/modules/user-settings/service";
 
 const TimeEntryRef = builder
@@ -25,6 +25,15 @@ const DailyTotalRef = builder
   .implement({
     fields: (t) => ({
       date: t.exposeString("date"),
+      totalMinutes: t.exposeInt("totalMinutes"),
+    }),
+  });
+
+const TagTotalRef = builder
+  .objectRef<TagTotal>("TagTotal")
+  .implement({
+    fields: (t) => ({
+      tag: t.exposeString("tag"),
       totalMinutes: t.exposeInt("totalMinutes"),
     }),
   });
@@ -115,6 +124,25 @@ builder.queryField("userTags", (t) =>
       return service.listUserTags(
         ctx.session.userId,
         ctx.session.activeOrganizationId
+      );
+    },
+  })
+);
+
+builder.queryField("tagTotals", (t) =>
+  t.field({
+    type: [TagTotalRef],
+    args: {
+      from: t.arg({ type: "DateTime", required: true }),
+      to: t.arg({ type: "DateTime", required: true }),
+    },
+    resolve: async (_, args, ctx) => {
+      if (!ctx.session) throw new NotAuthenticatedError();
+      return service.getTagTotals(
+        ctx.session.userId,
+        ctx.session.activeOrganizationId,
+        args.from,
+        args.to
       );
     },
   })

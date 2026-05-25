@@ -8,3 +8,9 @@ export interface DailyTotal {
   date: string; // YYYY-MM-DD in user's tz
   totalMinutes: number;
 }
+
+export interface TagTotal {
+  /** Tag name. The sentinel "(untagged)" represents entries with empty tags. */
+  tag: string;
+  totalMinutes: number;
+}

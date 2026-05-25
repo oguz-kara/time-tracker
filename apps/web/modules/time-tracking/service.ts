@@ -1,6 +1,6 @@
 import { db, eq, and, sql, isNull, gte, lt, desc } from "@jetframe/db";
 import { timeEntries } from "@jetframe/db/schema/time-tracking";
-import type { TimeEntry, DailyTotal } from "./types";
+import type { TimeEntry, DailyTotal, TagTotal } from "./types";
 import {
   AlreadyRunningError,
   NoRunningTimerError,
@@ -58,6 +58,69 @@ export async function listUserTags(
   `);
   const rows = result as unknown as Array<{ tag: string }>;
   return rows.map((r) => r.tag);
+}
+
+/**
+ * Total minutes per tag in a date range. Entries with multiple tags
+ * contribute their full duration to *each* tag (matches user expectation:
+ * "how much time on `coding`?" includes any entry tagged with it).
+ *
+ * Entries with no tags are bucketed as "(untagged)" via UNION ALL so the
+ * sum across all returned rows still ties out to total minutes worked.
+ *
+ * Duration clamping (LEAST/COALESCE/GREATEST) matches `getDailyTotals` so
+ * the numbers reconcile between the daily-totals chart and this breakdown.
+ */
+export async function getTagTotals(
+  userId: string,
+  organizationId: string,
+  from: Date,
+  to: Date
+): Promise<TagTotal[]> {
+  const result = await db.execute(sql`
+    SELECT
+      tag,
+      SUM(
+        EXTRACT(EPOCH FROM (
+          LEAST(COALESCE("stop", now()), ${to.toISOString()}::timestamp)
+          - GREATEST("start", ${from.toISOString()}::timestamp)
+        )) / 60
+      )::int AS total_minutes
+    FROM time_entries,
+      LATERAL unnest(tags) AS tag
+    WHERE user_id = ${userId}
+      AND organization_id = ${organizationId}
+      AND "start" >= ${from.toISOString()}
+      AND "start" <  ${to.toISOString()}
+      AND array_length(tags, 1) > 0
+    GROUP BY tag
+
+    UNION ALL
+
+    SELECT
+      '(untagged)' AS tag,
+      SUM(
+        EXTRACT(EPOCH FROM (
+          LEAST(COALESCE("stop", now()), ${to.toISOString()}::timestamp)
+          - GREATEST("start", ${from.toISOString()}::timestamp)
+        )) / 60
+      )::int AS total_minutes
+    FROM time_entries
+    WHERE user_id = ${userId}
+      AND organization_id = ${organizationId}
+      AND "start" >= ${from.toISOString()}
+      AND "start" <  ${to.toISOString()}
+      AND (array_length(tags, 1) IS NULL OR array_length(tags, 1) = 0)
+
+    ORDER BY total_minutes DESC
+  `);
+  const rows = result as unknown as Array<{
+    tag: string;
+    total_minutes: number | null;
+  }>;
+  return rows
+    .filter((r) => (r.total_minutes ?? 0) > 0)
+    .map((r) => ({ tag: r.tag, totalMinutes: Number(r.total_minutes ?? 0) }));
 }
 
 export async function listEntries(
