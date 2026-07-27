@@ -21,6 +21,7 @@ import * as projects from "./schema/projects";
 import * as tasks from "./schema/tasks";
 import * as notifications from "./schema/notifications";
 import * as timeTracking from "./schema/time_tracking";
+import * as habitsSchema from "./schema/habits";
 
 // Create postgres connection
 const connectionString = process.env.DATABASE_URL!;
@@ -37,6 +38,7 @@ export const db = drizzle(client, {
     ...tasks,
     ...notifications,
     ...timeTracking,
+    ...habitsSchema,
   },
 });
 
@@ -49,6 +51,7 @@ export * from "./schema/projects";
 export * from "./schema/tasks";
 export * from "./schema/notifications";
 export * from "./schema/time_tracking";
+export * from "./schema/habits";
 export * from "./utils/pagination";
 
 // Export drizzle-orm operators and types to ensure single instance

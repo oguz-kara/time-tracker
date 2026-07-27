@@ -11,6 +11,7 @@ export default defineConfig({
     "./schema/billing.ts",
     "./schema/ai.ts",
     "./schema/time_tracking.ts",
+    "./schema/habits.ts",
     "../../apps/web/modules/projects/schema.ts",
     "../../apps/web/modules/tasks/schema.ts",
   ],
