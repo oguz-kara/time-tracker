@@ -81,8 +81,8 @@ export function EntryList({ range, activeTag = null, title }: Props) {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const del = useDeleteEntryMutation({
-    onSuccess: () => {
-      invalidateTimeTrackingQueries(qc);
+    onSuccess: async () => {
+      await invalidateTimeTrackingQueries(qc);
       setPendingDelete(null);
     },
     onError: (e: unknown) =>

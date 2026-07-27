@@ -85,8 +85,10 @@ export function HabitDialog({ open, onOpenChange, habit }: Props) {
 
   const onError = (err: unknown) =>
     toast.error(err instanceof Error ? err.message : t("saveFailed"));
-  const onSuccess = () => {
-    invalidateHabitsQueries(qc);
+  // Await the refetch before closing: the save button's spinner covers the
+  // whole round-trip, so the list behind the dialog is fresh when it closes.
+  const onSuccess = async () => {
+    await invalidateHabitsQueries(qc);
     onOpenChange(false);
   };
   const create = useCreateHabitMutation({ onError, onSuccess });

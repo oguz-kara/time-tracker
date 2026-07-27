@@ -44,17 +44,18 @@ export function ActiveSprintCard({ view }: { view: View }) {
   const backlog = backlogData?.habits ?? [];
   const members = view.members ?? [];
 
-  const onSettled = () => invalidateHabitsQueries(qc);
   const add = useAddHabitToSprintMutation({
     onError: (err: unknown) =>
       toast.error(err instanceof Error ? err.message : t("swapFailed")),
-    onSettled,
+    onSettled: () => invalidateHabitsQueries(qc),
   });
   const remove = useRemoveHabitFromSprintMutation({
     onError: (err: unknown) =>
       toast.error(err instanceof Error ? err.message : t("dropFailed")),
-    onSuccess: () => setConfirmDropId(null),
-    onSettled,
+    onSuccess: async () => {
+      await invalidateHabitsQueries(qc);
+      setConfirmDropId(null);
+    },
   });
 
   const dayNumber = view.dayNumber ?? 0;
@@ -120,7 +121,11 @@ export function ActiveSprintCard({ view }: { view: View }) {
                       onClick={() => add.mutate({ habitId: id })}
                       aria-label={h.name ?? undefined}
                     >
-                      <Plus className="h-4 w-4" />
+                      {add.isPending && add.variables?.habitId === id ? (
+                        <Spinner className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 );

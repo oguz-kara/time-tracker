@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
+  useGetDailyChecklistQuery,
   useToggleCheckMutation,
   useToggleSkipMutation,
   useLogSlipMutation,
@@ -20,19 +21,93 @@ import { invalidateHabitsQueries } from "../utils/invalidate";
 import { HabitHistoryDialog } from "./HabitHistoryDialog";
 
 type Item = NonNullable<GetDailyChecklistQuery["dailyChecklist"]>[number];
+type MutationCtx = { previous: GetDailyChecklistQuery | undefined };
 
 export function ChecklistItem({ item, date }: { item: Item; date: string }) {
   const t = useTranslations("habits.today");
   const qc = useQueryClient();
+  const listKey = useGetDailyChecklistQuery.getKey({ date });
 
-  const onError = (err: unknown) =>
+  /**
+   * Optimistic-update factory (Timer.tsx pattern): cancel in-flight
+   * refetches, snapshot, patch the targeted checklist row immediately, and
+   * hand the snapshot to onError for rollback. onSettled's returned
+   * invalidate promise keeps isPending true until fresh data lands.
+   */
+  const optimistic =
+    (patch: (it: Item) => Partial<Item>) =>
+    async (variables: { habitId: string; date: string }): Promise<MutationCtx> => {
+      await qc.cancelQueries({ queryKey: listKey });
+      const previous = qc.getQueryData<GetDailyChecklistQuery>(listKey);
+      qc.setQueryData<GetDailyChecklistQuery>(listKey, (old) => {
+        if (!old?.dailyChecklist) return old;
+        return {
+          ...old,
+          dailyChecklist: old.dailyChecklist.map((it) =>
+            it.habit?.id === variables.habitId ? { ...it, ...patch(it) } : it
+          ),
+        };
+      });
+      return { previous };
+    };
+
+  const onError = (err: unknown, _vars: unknown, context: MutationCtx | undefined) => {
+    if (context?.previous !== undefined) qc.setQueryData(listKey, context.previous);
     toast.error(err instanceof Error ? err.message : t("checkFailed"));
+  };
   const onSettled = () => invalidateHabitsQueries(qc);
 
-  const toggle = useToggleCheckMutation({ onError, onSettled });
-  const toggleSkip = useToggleSkipMutation({ onError, onSettled });
-  const slip = useLogSlipMutation({ onError, onSettled });
-  const undo = useUndoSlipMutation({ onError, onSettled });
+  const toggle = useToggleCheckMutation<unknown, MutationCtx>({
+    onMutate: optimistic((it) => {
+      const wasChecked = it.checkedToday ?? false;
+      const weekly = it.habit?.frequency === "weekly";
+      const delta = wasChecked ? -1 : 1;
+      return {
+        checkedToday: !wasChecked,
+        skippedToday: false,
+        thisWeekCount: weekly
+          ? Math.max(0, (it.thisWeekCount ?? 0) + delta)
+          : it.thisWeekCount,
+        streak: weekly ? it.streak : Math.max(0, (it.streak ?? 0) + delta),
+      };
+    }),
+    onError,
+    onSettled,
+  });
+  const toggleSkip = useToggleSkipMutation<unknown, MutationCtx>({
+    onMutate: optimistic((it) => {
+      const wasSkipped = it.skippedToday ?? false;
+      const wasChecked = it.checkedToday ?? false;
+      const weekly = it.habit?.frequency === "weekly";
+      return {
+        skippedToday: !wasSkipped,
+        checkedToday: false,
+        thisWeekCount:
+          wasChecked && weekly
+            ? Math.max(0, (it.thisWeekCount ?? 0) - 1)
+            : it.thisWeekCount,
+        streak:
+          wasChecked && !weekly ? Math.max(0, (it.streak ?? 0) - 1) : it.streak,
+      };
+    }),
+    onError,
+    onSettled,
+  });
+  const slip = useLogSlipMutation<unknown, MutationCtx>({
+    onMutate: optimistic((it) => ({
+      slipCountToday: (it.slipCountToday ?? 0) + 1,
+      streak: 0,
+    })),
+    onError,
+    onSettled,
+  });
+  const undo = useUndoSlipMutation<unknown, MutationCtx>({
+    onMutate: optimistic((it) => ({
+      slipCountToday: Math.max(0, (it.slipCountToday ?? 0) - 1),
+    })),
+    onError,
+    onSettled,
+  });
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const habit = item.habit;

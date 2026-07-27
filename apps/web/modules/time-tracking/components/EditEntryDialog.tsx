@@ -61,16 +61,19 @@ export function EditEntryDialog({ open, onOpenChange, entry }: Props) {
     }
   }, [entry?.id, open]);
 
+  // Await the refetch before closing: the save button's spinner covers the
+  // whole round-trip, so the entry list is already fresh when the dialog
+  // closes (no post-close pop-in).
   const create = useCreateEntryMutation({
-    onSuccess: () => {
-      invalidateTimeTrackingQueries(qc);
+    onSuccess: async () => {
+      await invalidateTimeTrackingQueries(qc);
       onOpenChange(false);
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : t("saveFailed")),
   });
   const update = useUpdateEntryMutation({
-    onSuccess: () => {
-      invalidateTimeTrackingQueries(qc);
+    onSuccess: async () => {
+      await invalidateTimeTrackingQueries(qc);
       onOpenChange(false);
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : t("saveFailed")),

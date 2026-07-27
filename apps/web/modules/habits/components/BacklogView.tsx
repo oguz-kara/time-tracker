@@ -107,8 +107,8 @@ export function BacklogView() {
   const drop = useDropHabitMutation({
     onError: (err: unknown) =>
       toast.error(err instanceof Error ? err.message : t("dropFailed")),
-    onSuccess: () => {
-      invalidateHabitsQueries(qc);
+    onSuccess: async () => {
+      await invalidateHabitsQueries(qc);
       setConfirmDrop(null);
     },
   });
