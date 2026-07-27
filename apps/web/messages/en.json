@@ -194,6 +194,11 @@
   },
   "habits": {
     "title": "Habits",
+    "nav": {
+      "today": "Today",
+      "backlog": "Backlog",
+      "sprint": "Sprint"
+    },
     "today": {
       "empty": "Nothing to check yet. Add habits to your backlog and start a sprint.",
       "established": "Established",

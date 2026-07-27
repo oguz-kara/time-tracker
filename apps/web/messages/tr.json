@@ -194,6 +194,11 @@
   },
   "habits": {
     "title": "Alışkanlıklar",
+    "nav": {
+      "today": "Bugün",
+      "backlog": "Backlog",
+      "sprint": "Sprint"
+    },
     "today": {
       "empty": "Henüz işaretlenecek bir şey yok. Backlog'a alışkanlık ekle ve bir sprint başlat.",
       "established": "Yerleşmiş",

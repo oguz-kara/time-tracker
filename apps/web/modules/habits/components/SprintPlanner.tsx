@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +90,12 @@ export function SprintPlanner() {
         <div className="space-y-1.5">
           <Label>{t("selectHabits")}</Label>
           {backlog.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("noBacklog")}</p>
+            <Link
+              href="/habits/backlog"
+              className="block text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              {t("noBacklog")}
+            </Link>
           ) : (
             <div className="space-y-1">
               {backlog.map((b, i) => {
