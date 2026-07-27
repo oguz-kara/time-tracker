@@ -18,6 +18,7 @@ export const SPRINT_OUTCOMES = ["graduated", "carried", "returned", "dropped"] a
 export interface ChecklistItem {
   habit: Habit;
   checkedToday: boolean;
+  skippedToday: boolean;
   slipCountToday: number;
   streak: number;
   thisWeekCount: number;

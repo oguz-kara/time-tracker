@@ -125,6 +125,7 @@ export type ChecklistItem = {
   checkedToday?: Maybe<Scalars["Boolean"]["output"]>;
   habit?: Maybe<Habit>;
   needsAttention?: Maybe<Scalars["Boolean"]["output"]>;
+  skippedToday?: Maybe<Scalars["Boolean"]["output"]>;
   slipCountToday?: Maybe<Scalars["Int"]["output"]>;
   streak?: Maybe<Scalars["Int"]["output"]>;
   thisWeekCount?: Maybe<Scalars["Int"]["output"]>;
@@ -272,6 +273,13 @@ export type Habit = {
   updatedAt?: Maybe<Scalars["DateTime"]["output"]>;
 };
 
+export type HabitCheckDay = {
+  __typename?: "HabitCheckDay";
+  count?: Maybe<Scalars["Int"]["output"]>;
+  date?: Maybe<Scalars["String"]["output"]>;
+  kind?: Maybe<Scalars["String"]["output"]>;
+};
+
 export type HabitInput = {
   frequency?: InputMaybe<Scalars["String"]["input"]>;
   identity?: InputMaybe<Scalars["String"]["input"]>;
@@ -324,6 +332,7 @@ export type Mutation = {
   startTimer?: Maybe<TimeEntry>;
   stopTimer?: Maybe<TimeEntry>;
   toggleCheck?: Maybe<Scalars["Boolean"]["output"]>;
+  toggleSkip?: Maybe<Scalars["Boolean"]["output"]>;
   undoSlip?: Maybe<Scalars["Int"]["output"]>;
   updateEntry?: Maybe<TimeEntry>;
   updateHabit?: Maybe<Habit>;
@@ -420,6 +429,11 @@ export type MutationStartTimerArgs = {
 };
 
 export type MutationToggleCheckArgs = {
+  date: Scalars["String"]["input"];
+  habitId: Scalars["String"]["input"];
+};
+
+export type MutationToggleSkipArgs = {
   date: Scalars["String"]["input"];
   habitId: Scalars["String"]["input"];
 };
@@ -527,6 +541,7 @@ export type Query = {
   entries?: Maybe<Array<TimeEntry>>;
   file?: Maybe<File>;
   files?: Maybe<Array<File>>;
+  habitChecks?: Maybe<Array<HabitCheckDay>>;
   habits?: Maybe<Array<Habit>>;
   health?: Maybe<Scalars["String"]["output"]>;
   notifications?: Maybe<Array<Notification>>;
@@ -573,6 +588,12 @@ export type QueryEntriesArgs = {
 
 export type QueryFileArgs = {
   id: Scalars["String"]["input"];
+};
+
+export type QueryHabitChecksArgs = {
+  from: Scalars["String"]["input"];
+  habitId: Scalars["String"]["input"];
+  to: Scalars["String"]["input"];
 };
 
 export type QueryHabitsArgs = {
@@ -1093,6 +1114,16 @@ export type ToggleCheckMutation = {
   toggleCheck?: boolean | null;
 };
 
+export type ToggleSkipMutationVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+  date: Scalars["String"]["input"];
+}>;
+
+export type ToggleSkipMutation = {
+  __typename?: "Mutation";
+  toggleSkip?: boolean | null;
+};
+
 export type LogSlipMutationVariables = Exact<{
   habitId: Scalars["String"]["input"];
   date: Scalars["String"]["input"];
@@ -1213,6 +1244,7 @@ export type GetDailyChecklistQuery = {
   dailyChecklist?: Array<{
     __typename?: "ChecklistItem";
     checkedToday?: boolean | null;
+    skippedToday?: boolean | null;
     slipCountToday?: number | null;
     streak?: number | null;
     thisWeekCount?: number | null;
@@ -1233,6 +1265,22 @@ export type GetDailyChecklistQuery = {
       createdAt?: any | null;
       updatedAt?: any | null;
     } | null;
+  }> | null;
+};
+
+export type GetHabitChecksQueryVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+  from: Scalars["String"]["input"];
+  to: Scalars["String"]["input"];
+}>;
+
+export type GetHabitChecksQuery = {
+  __typename?: "Query";
+  habitChecks?: Array<{
+    __typename?: "HabitCheckDay";
+    date?: string | null;
+    kind?: string | null;
+    count?: number | null;
   }> | null;
 };
 
@@ -3038,6 +3086,42 @@ useToggleCheckMutation.fetcher = (variables: ToggleCheckMutationVariables) =>
     variables,
   );
 
+export const ToggleSkipDocument = `
+    mutation ToggleSkip($habitId: String!, $date: String!) {
+  toggleSkip(habitId: $habitId, date: $date)
+}
+    `;
+
+export const useToggleSkipMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    ToggleSkipMutation,
+    TError,
+    ToggleSkipMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    ToggleSkipMutation,
+    TError,
+    ToggleSkipMutationVariables,
+    TContext
+  >({
+    mutationKey: ["ToggleSkip"],
+    mutationFn: (variables?: ToggleSkipMutationVariables) =>
+      fetcher<ToggleSkipMutation, ToggleSkipMutationVariables>(
+        ToggleSkipDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useToggleSkipMutation.fetcher = (variables: ToggleSkipMutationVariables) =>
+  fetcher<ToggleSkipMutation, ToggleSkipMutationVariables>(
+    ToggleSkipDocument,
+    variables,
+  );
+
 export const LogSlipDocument = `
     mutation LogSlip($habitId: String!, $date: String!) {
   logSlip(habitId: $habitId, date: $date)
@@ -3333,6 +3417,7 @@ export const GetDailyChecklistDocument = `
       ...HabitFields
     }
     checkedToday
+    skippedToday
     slipCountToday
     streak
     thisWeekCount
@@ -3412,6 +3497,85 @@ useGetDailyChecklistQuery.fetcher = (
 ) =>
   fetcher<GetDailyChecklistQuery, GetDailyChecklistQueryVariables>(
     GetDailyChecklistDocument,
+    variables,
+  );
+
+export const GetHabitChecksDocument = `
+    query GetHabitChecks($habitId: String!, $from: String!, $to: String!) {
+  habitChecks(habitId: $habitId, from: $from, to: $to) {
+    date
+    kind
+    count
+  }
+}
+    `;
+
+export const useGetHabitChecksQuery = <
+  TData = GetHabitChecksQuery,
+  TError = unknown,
+>(
+  variables: GetHabitChecksQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetHabitChecksQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<GetHabitChecksQuery, TError, TData>["queryKey"];
+  },
+) => {
+  return useQuery<GetHabitChecksQuery, TError, TData>({
+    queryKey: ["GetHabitChecks", variables],
+    queryFn: fetcher<GetHabitChecksQuery, GetHabitChecksQueryVariables>(
+      GetHabitChecksDocument,
+      variables,
+    ),
+    ...options,
+  });
+};
+
+useGetHabitChecksQuery.getKey = (variables: GetHabitChecksQueryVariables) => [
+  "GetHabitChecks",
+  variables,
+];
+
+export const useInfiniteGetHabitChecksQuery = <
+  TData = InfiniteData<GetHabitChecksQuery>,
+  TError = unknown,
+>(
+  variables: GetHabitChecksQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetHabitChecksQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetHabitChecksQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetHabitChecksQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey: optionsQueryKey ?? ["GetHabitChecks.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetHabitChecksQuery, GetHabitChecksQueryVariables>(
+            GetHabitChecksDocument,
+            { ...variables, ...(metaData.pageParam ?? {}) },
+          )(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetHabitChecksQuery.getKey = (
+  variables: GetHabitChecksQueryVariables,
+) => ["GetHabitChecks.infinite", variables];
+
+useGetHabitChecksQuery.fetcher = (variables: GetHabitChecksQueryVariables) =>
+  fetcher<GetHabitChecksQuery, GetHabitChecksQueryVariables>(
+    GetHabitChecksDocument,
     variables,
   );
 

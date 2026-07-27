@@ -32,6 +32,7 @@ import {
 } from "@/lib/graphql/generated";
 import { invalidateHabitsQueries } from "../utils/invalidate";
 import { HabitDialog } from "./HabitDialog";
+import { HabitHistoryDialog } from "./HabitHistoryDialog";
 
 type HabitRow = NonNullable<GetHabitsQuery["habits"]>[number];
 
@@ -45,12 +46,19 @@ function HabitLine({
   onDrop?: (h: HabitRow) => void;
 }) {
   const t = useTranslations("habits.backlog");
+  const [historyOpen, setHistoryOpen] = useState(false);
   return (
     <Card size="sm">
       <CardContent className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm">{habit.name}</span>
+            <button
+              type="button"
+              className="truncate text-left text-sm hover:underline"
+              onClick={() => setHistoryOpen(true)}
+            >
+              {habit.name}
+            </button>
             <Badge variant="outline">
               {habit.type === "good" ? t("typeGood") : t("typeBad")}
             </Badge>
@@ -78,6 +86,7 @@ function HabitLine({
           </Button>
         )}
       </CardContent>
+      <HabitHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} habit={habit} />
     </Card>
   );
 }

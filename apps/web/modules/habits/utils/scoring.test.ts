@@ -17,6 +17,7 @@ const bad: ScoringHabit = { type: "bad", frequency: "daily", timesPerWeek: null 
 
 const done = (date: string): CheckLike => ({ date, kind: "done", count: 1 });
 const slip = (date: string, count = 1): CheckLike => ({ date, kind: "slip", count });
+const skip = (date: string): CheckLike => ({ date, kind: "skip", count: 1 });
 
 describe("computeDailyStreak", () => {
   it("counts consecutive days ending today", () => {
@@ -29,6 +30,21 @@ describe("computeDailyStreak", () => {
   });
   it("is 0 with no checks", () => {
     expect(computeDailyStreak(new Set(), TODAY)).toBe(0);
+  });
+  it("bridges excused days without counting them", () => {
+    // done 25th, excused 26th, today pending → streak 1 (bridged through the 26th)
+    const doneDates = new Set(["2026-07-25"]);
+    const skipped = new Set(["2026-07-26"]);
+    expect(computeDailyStreak(doneDates, TODAY, skipped)).toBe(1);
+    // done 24+25, excused 26, done today → 3
+    expect(
+      computeDailyStreak(new Set(["2026-07-24", "2026-07-25", "2026-07-27"]), TODAY, skipped)
+    ).toBe(3);
+  });
+  it("an excused today still lets yesterday's run count", () => {
+    expect(
+      computeDailyStreak(new Set(["2026-07-25", "2026-07-26"]), TODAY, new Set([TODAY]))
+    ).toBe(2);
   });
 });
 
@@ -101,12 +117,32 @@ describe("completionPct", () => {
     const checks = [done("2026-06-30"), done("2026-07-01")];
     expect(completionPct(goodDaily, checks, "2026-07-01", "2026-07-14", TODAY)).toBe(7); // 1/14
   });
+  it("excused days shrink the expectation (daily)", () => {
+    // 7 elapsed, 2 excused → expected 5; 4 done → 80
+    const checks = [
+      done("2026-07-21"), done("2026-07-22"), done("2026-07-24"), done("2026-07-27"),
+      skip("2026-07-23"), skip("2026-07-25"),
+    ];
+    expect(completionPct(goodDaily, checks, "2026-07-21", "2026-08-03", TODAY)).toBe(80);
+  });
+  it("excused days shrink the expectation (weekly, prorated)", () => {
+    // 7 elapsed, 1 excused → expected 3 × 6/7 ≈ 2.57; 2 done → 78
+    const checks = [done("2026-07-21"), done("2026-07-24"), skip("2026-07-25")];
+    expect(completionPct(goodWeekly3, checks, "2026-07-21", "2026-08-03", TODAY)).toBe(78);
+  });
+  it("a fully excused window scores 100", () => {
+    const checks = [skip("2026-07-25"), skip("2026-07-26"), skip("2026-07-27")];
+    expect(completionPct(goodDaily, checks, "2026-07-25", "2026-07-31", TODAY)).toBe(100);
+  });
 });
 
 describe("needsAttention", () => {
   it("daily: flags when no done in the last 3 days", () => {
     expect(needsAttention(goodDaily, [done("2026-07-24")], TODAY, 1)).toBe(true);
     expect(needsAttention(goodDaily, [done("2026-07-25")], TODAY, 1)).toBe(false);
+  });
+  it("daily: an excused day counts as activity", () => {
+    expect(needsAttention(goodDaily, [done("2026-07-24"), skip("2026-07-26")], TODAY, 1)).toBe(false);
   });
   it("weekly: flags when the previous week missed quota", () => {
     const met = ["2026-07-20", "2026-07-22", "2026-07-24"].map(done);

@@ -3,6 +3,11 @@ import { addDays, diffDays, weekStartKey } from "./dates";
 /**
  * Pure scoring logic for habits. No DB, no React — fully unit-tested.
  * All date params are YYYY-MM-DD keys in the user's timezone.
+ *
+ * Check kinds: 'done' (good habits), 'slip' (bad habits), 'skip' (an
+ * excused day on a good habit — sick, traveling, deliberate rest). Excused
+ * days bridge streaks without counting, shrink the sprint expectation, and
+ * count as engagement for the needs-attention check.
  */
 
 export interface ScoringHabit {
@@ -13,19 +18,36 @@ export interface ScoringHabit {
 
 export interface CheckLike {
   date: string;
-  kind: "done" | "slip";
+  kind: "done" | "slip" | "skip";
   count: number;
 }
 
 const STREAK_SAFETY_CAP = 3650;
 
-/** Consecutive done-days ending today or yesterday. */
-export function computeDailyStreak(doneDates: ReadonlySet<string>, today: string): number {
-  let cursor = doneDates.has(today) ? today : addDays(today, -1);
+/**
+ * Consecutive done-days ending today or yesterday. Excused days are
+ * bridged: they never break the run and never count toward it.
+ */
+export function computeDailyStreak(
+  doneDates: ReadonlySet<string>,
+  today: string,
+  skippedDates: ReadonlySet<string> = new Set()
+): number {
+  let cursor = today;
   let streak = 0;
-  while (doneDates.has(cursor) && streak < STREAK_SAFETY_CAP) {
-    streak++;
-    cursor = addDays(cursor, -1);
+  let iterations = 0;
+  while (iterations++ < STREAK_SAFETY_CAP) {
+    if (doneDates.has(cursor)) {
+      streak++;
+      cursor = addDays(cursor, -1);
+    } else if (skippedDates.has(cursor)) {
+      cursor = addDays(cursor, -1);
+    } else if (cursor === today) {
+      // Today is still pending — an empty today doesn't break the run.
+      cursor = addDays(cursor, -1);
+    } else {
+      break;
+    }
   }
   return streak;
 }
@@ -81,8 +103,10 @@ function inWindow(date: string, startKey: string, endKey: string, today: string)
 
 /**
  * Sprint-window completion percentage (0–100 int).
- * Good daily: doneDays/elapsed. Good weekly: doneDays/(tpw × elapsed/7).
- * Bad: cleanDays/elapsed. Checks outside the clamped window are ignored.
+ * Good daily: doneDays/(elapsed − excused). Good weekly:
+ * doneDays/(tpw × (elapsed − excused)/7). Bad: cleanDays/elapsed.
+ * Checks outside the clamped window are ignored. A fully excused window
+ * scores 100 — nothing was expected, nothing was missed.
  */
 export function completionPct(
   habit: ScoringHabit,
@@ -102,18 +126,21 @@ export function completionPct(
   }
 
   const doneDays = new Set(windowed.filter((c) => c.kind === "done").map((c) => c.date)).size;
+  const skipDays = new Set(windowed.filter((c) => c.kind === "skip").map((c) => c.date)).size;
+  const effectiveElapsed = Math.max(0, elapsed - skipDays);
   const expected =
     habit.frequency === "weekly" && habit.timesPerWeek
-      ? (habit.timesPerWeek * elapsed) / 7
-      : elapsed;
-  if (expected <= 0) return 0;
+      ? (habit.timesPerWeek * effectiveElapsed) / 7
+      : effectiveElapsed;
+  if (expected <= 0) return skipDays > 0 ? 100 : 0;
   return Math.min(100, Math.round((doneDays / expected) * 100));
 }
 
 /**
  * Established-decay flag.
- * Daily: no done within [today-2 .. today]. Weekly: previous week's quota
- * missed. Bad: slip counts summing ≥ 2 within [today-6 .. today].
+ * Daily: no done (or excused) day within [today-2 .. today]. Weekly:
+ * previous week's quota missed. Bad: slip counts summing ≥ 2 within
+ * [today-6 .. today].
  */
 export function needsAttention(
   habit: ScoringHabit,
@@ -139,5 +166,7 @@ export function needsAttention(
     return count < habit.timesPerWeek;
   }
   const floor = addDays(today, -2);
-  return !checks.some((c) => c.kind === "done" && c.date >= floor && c.date <= today);
+  return !checks.some(
+    (c) => (c.kind === "done" || c.kind === "skip") && c.date >= floor && c.date <= today
+  );
 }

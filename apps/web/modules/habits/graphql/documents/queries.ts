@@ -58,6 +58,7 @@ export const GET_DAILY_CHECKLIST = gql`
         ...HabitFields
       }
       checkedToday
+      skippedToday
       slipCountToday
       streak
       thisWeekCount
@@ -65,6 +66,16 @@ export const GET_DAILY_CHECKLIST = gql`
     }
   }
   ${HABIT_FIELDS}
+`;
+
+export const GET_HABIT_CHECKS = gql`
+  query GetHabitChecks($habitId: String!, $from: String!, $to: String!) {
+    habitChecks(habitId: $habitId, from: $from, to: $to) {
+      date
+      kind
+      count
+    }
+  }
 `;
 
 export const GET_ACTIVE_SPRINT = gql`

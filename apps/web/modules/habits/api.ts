@@ -57,6 +57,7 @@ const ChecklistItemRef = builder.objectRef<ChecklistItem>("ChecklistItem").imple
   fields: (t) => ({
     habit: t.field({ type: HabitRef, resolve: (i) => i.habit }),
     checkedToday: t.exposeBoolean("checkedToday"),
+    skippedToday: t.exposeBoolean("skippedToday"),
     slipCountToday: t.exposeInt("slipCountToday"),
     streak: t.exposeInt("streak"),
     thisWeekCount: t.exposeInt("thisWeekCount"),
@@ -94,6 +95,16 @@ const CompletedSprintViewRef = builder
       sprint: t.field({ type: SprintRef, resolve: (v) => v.sprint }),
       overallPct: t.exposeInt("overallPct"),
       members: t.field({ type: [SprintMemberProgressRef], resolve: (v) => v.members }),
+    }),
+  });
+
+const HabitCheckRef = builder
+  .objectRef<{ date: string; kind: string; count: number }>("HabitCheckDay")
+  .implement({
+    fields: (t) => ({
+      date: t.exposeString("date"),
+      kind: t.exposeString("kind"),
+      count: t.exposeInt("count"),
     }),
   });
 
@@ -211,6 +222,27 @@ builder.queryField("activeSprint", (t) =>
         ctx.session.userId,
         ctx.session.activeOrganizationId,
         prefs.timezone
+      );
+    },
+  })
+);
+
+builder.queryField("habitChecks", (t) =>
+  t.field({
+    type: [HabitCheckRef],
+    args: {
+      habitId: t.arg.string({ required: true }),
+      from: t.arg.string({ required: true }),
+      to: t.arg.string({ required: true }),
+    },
+    resolve: async (_, args, ctx) => {
+      if (!ctx.session) throw new NotAuthenticatedError();
+      return service.listHabitChecks(
+        ctx.session.userId,
+        ctx.session.activeOrganizationId,
+        args.habitId,
+        args.from,
+        args.to
       );
     },
   })
@@ -366,6 +398,27 @@ builder.mutationField("toggleCheck", (t) =>
       if (!ctx.session) throw new NotAuthenticatedError();
       const prefs = await getPrefs(ctx.session.userId);
       return service.toggleCheck(
+        ctx.session.userId,
+        ctx.session.activeOrganizationId,
+        args.habitId,
+        args.date,
+        prefs.timezone
+      );
+    },
+  })
+);
+
+builder.mutationField("toggleSkip", (t) =>
+  t.field({
+    type: "Boolean",
+    args: {
+      habitId: t.arg.string({ required: true }),
+      date: t.arg.string({ required: true }),
+    },
+    resolve: async (_, args, ctx) => {
+      if (!ctx.session) throw new NotAuthenticatedError();
+      const prefs = await getPrefs(ctx.session.userId);
+      return service.toggleSkip(
         ctx.session.userId,
         ctx.session.activeOrganizationId,
         args.habitId,

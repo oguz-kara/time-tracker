@@ -212,7 +212,17 @@
       "streakDays": "{days}d streak",
       "streakWeeks": "{weeks}w streak",
       "tryStarter": "Try the 2-minute version: {starter}",
-      "checkFailed": "Failed to save"
+      "checkFailed": "Failed to save",
+      "skip": "Excuse",
+      "skipped": "Excused"
+    },
+    "history": {
+      "title": "History",
+      "done": "Done",
+      "excused": "Excused",
+      "missed": "Missed",
+      "clean": "Clean",
+      "slip": "Slipped"
     },
     "strip": {
       "day": "Day {day} of {total}",

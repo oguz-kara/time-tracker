@@ -227,7 +227,11 @@ function assertCheckable(habit: Habit): void {
   }
 }
 
-/** Toggle a good habit's done-mark for a day. Returns the new state. */
+/**
+ * Toggle a good habit's done-mark for a day. Returns the new state.
+ * A day is three-state (empty / done / skip): checking an excused day
+ * upgrades it to done; unchecking a done day empties it.
+ */
 export async function toggleCheck(
   userId: string,
   organizationId: string,
@@ -248,9 +252,17 @@ export async function toggleCheck(
     .where(and(eq(habitChecks.habitId, habitId), eq(habitChecks.date, dateKey)))
     .limit(1);
 
-  if (existing.length > 0) {
+  if (existing.length > 0 && existing[0].kind === "done") {
     await db.delete(habitChecks).where(eq(habitChecks.id, existing[0].id));
     return false;
+  }
+  if (existing.length > 0) {
+    // was 'skip' → upgrade to done
+    await db
+      .update(habitChecks)
+      .set({ kind: "done", count: 1 })
+      .where(eq(habitChecks.id, existing[0].id));
+    return true;
   }
   await db.insert(habitChecks).values({
     userId,
@@ -258,6 +270,52 @@ export async function toggleCheck(
     habitId,
     date: dateKey,
     kind: "done",
+    count: 1,
+  });
+  return true;
+}
+
+/**
+ * Toggle a good habit's excused-mark for a day. Returns the new state.
+ * Excusing a done day replaces the done; un-excusing empties the day.
+ */
+export async function toggleSkip(
+  userId: string,
+  organizationId: string,
+  habitId: string,
+  dateKey: string,
+  timezone: string
+): Promise<boolean> {
+  const habit = await getOwnedHabit(userId, organizationId, habitId);
+  if (habit.type !== "good") {
+    throw new InvalidHabitStateError("Only good habits have excused days");
+  }
+  assertCheckable(habit);
+  assertValidDateKey(dateKey, todayKey(timezone));
+
+  const existing = await db
+    .select()
+    .from(habitChecks)
+    .where(and(eq(habitChecks.habitId, habitId), eq(habitChecks.date, dateKey)))
+    .limit(1);
+
+  if (existing.length > 0 && existing[0].kind === "skip") {
+    await db.delete(habitChecks).where(eq(habitChecks.id, existing[0].id));
+    return false;
+  }
+  if (existing.length > 0) {
+    await db
+      .update(habitChecks)
+      .set({ kind: "skip", count: 1 })
+      .where(eq(habitChecks.id, existing[0].id));
+    return true;
+  }
+  await db.insert(habitChecks).values({
+    userId,
+    organizationId,
+    habitId,
+    date: dateKey,
+    kind: "skip",
     count: 1,
   });
   return true;
@@ -382,7 +440,7 @@ export async function getDailyChecklist(
   const items = active.map((habit) => {
     const mine: CheckLike[] = checkRows
       .filter((c) => c.habitId === habit.id)
-      .map((c) => ({ date: c.date, kind: c.kind as "done" | "slip", count: c.count }));
+      .map((c) => ({ date: c.date, kind: c.kind as "done" | "slip" | "skip", count: c.count }));
     const todayRow = mine.find((c) => c.date === dateKey);
     const scoring: ScoringHabit = {
       type: habit.type as "good" | "bad",
@@ -404,12 +462,14 @@ export async function getDailyChecklist(
       thisWeekCount = weekly.thisWeekCount;
     } else {
       const doneDates = new Set(mine.filter((c) => c.kind === "done").map((c) => c.date));
-      streak = computeDailyStreak(doneDates, dateKey);
+      const skippedDates = new Set(mine.filter((c) => c.kind === "skip").map((c) => c.date));
+      streak = computeDailyStreak(doneDates, dateKey, skippedDates);
     }
 
     return {
       habit,
       checkedToday: habit.type === "good" && todayRow?.kind === "done",
+      skippedToday: habit.type === "good" && todayRow?.kind === "skip",
       slipCountToday: habit.type === "bad" ? (todayRow?.count ?? 0) : 0,
       streak,
       thisWeekCount,
@@ -787,6 +847,29 @@ export async function listCompletedSprints(
         : Math.round(members.reduce((acc, m) => acc + m.completionPct, 0) / members.length);
     return { sprint, overallPct, members };
   });
+}
+
+/** Raw per-day check rows for one habit in a window (heatmap data). */
+export async function listHabitChecks(
+  userId: string,
+  organizationId: string,
+  habitId: string,
+  fromKey: string,
+  toKey: string
+): Promise<{ date: string; kind: string; count: number }[]> {
+  await getOwnedHabit(userId, organizationId, habitId);
+  const rows = await db
+    .select()
+    .from(habitChecks)
+    .where(
+      and(
+        eq(habitChecks.habitId, habitId),
+        gte(habitChecks.date, fromKey),
+        lte(habitChecks.date, toKey)
+      )
+    )
+    .orderBy(asc(habitChecks.date));
+  return rows.map((r) => ({ date: r.date, kind: r.kind, count: r.count }));
 }
 
 /** Backlog habits + their latest sprint outcome (planner pre-checks 'carried'). */

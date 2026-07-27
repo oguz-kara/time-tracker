@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,11 +11,13 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   useToggleCheckMutation,
+  useToggleSkipMutation,
   useLogSlipMutation,
   useUndoSlipMutation,
   type GetDailyChecklistQuery,
 } from "@/lib/graphql/generated";
 import { invalidateHabitsQueries } from "../utils/invalidate";
+import { HabitHistoryDialog } from "./HabitHistoryDialog";
 
 type Item = NonNullable<GetDailyChecklistQuery["dailyChecklist"]>[number];
 
@@ -27,14 +30,17 @@ export function ChecklistItem({ item, date }: { item: Item; date: string }) {
   const onSettled = () => invalidateHabitsQueries(qc);
 
   const toggle = useToggleCheckMutation({ onError, onSettled });
+  const toggleSkip = useToggleSkipMutation({ onError, onSettled });
   const slip = useLogSlipMutation({ onError, onSettled });
   const undo = useUndoSlipMutation({ onError, onSettled });
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const habit = item.habit;
   const habitId = habit?.id;
   if (!habit || !habitId) return null;
 
   const checkedToday = item.checkedToday ?? false;
+  const skippedToday = item.skippedToday ?? false;
   const thisWeekCount = item.thisWeekCount ?? 0;
   const streak = item.streak ?? 0;
   const slipCountToday = item.slipCountToday ?? 0;
@@ -44,7 +50,10 @@ export function ChecklistItem({ item, date }: { item: Item; date: string }) {
   const quotaMet = isWeekly && thisWeekCount >= (habit.timesPerWeek ?? 0);
 
   return (
-    <Card size="sm" className={quotaMet && !checkedToday ? "opacity-60" : undefined}>
+    <Card
+      size="sm"
+      className={(quotaMet && !checkedToday) || skippedToday ? "opacity-60" : undefined}
+    >
       <CardContent className="flex items-center gap-3">
         {habit.type === "good" && (
           <Checkbox
@@ -57,7 +66,14 @@ export function ChecklistItem({ item, date }: { item: Item; date: string }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm">{habit.name}</span>
+            <button
+              type="button"
+              className="truncate text-left text-sm hover:underline"
+              onClick={() => setHistoryOpen(true)}
+            >
+              {habit.name}
+            </button>
+            {skippedToday && <Badge variant="outline">{t("skipped")}</Badge>}
             {habit.status === "established" && (
               <Badge variant="secondary">{t("established")}</Badge>
             )}
@@ -93,6 +109,17 @@ export function ChecklistItem({ item, date }: { item: Item; date: string }) {
                 : t("streakDays", { days: streak })}
             </span>
           )}
+          {habit.type === "good" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={toggleSkip.isPending}
+              className={skippedToday ? "text-primary" : undefined}
+              onClick={() => toggleSkip.mutate({ habitId, date })}
+            >
+              {skippedToday ? t("skipped") : t("skip")}
+            </Button>
+          )}
           {habit.type === "bad" && (
             <>
               <span className="font-mono tabular-nums">{t("daysClean", { days: streak })}</span>
@@ -121,6 +148,7 @@ export function ChecklistItem({ item, date }: { item: Item; date: string }) {
           )}
         </div>
       </CardContent>
+      <HabitHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} habit={habit} />
     </Card>
   );
 }

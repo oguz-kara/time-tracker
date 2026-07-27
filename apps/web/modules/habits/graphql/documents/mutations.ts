@@ -55,6 +55,12 @@ export const TOGGLE_CHECK = gql`
   }
 `;
 
+export const TOGGLE_SKIP = gql`
+  mutation ToggleSkip($habitId: String!, $date: String!) {
+    toggleSkip(habitId: $habitId, date: $date)
+  }
+`;
+
 export const LOG_SLIP = gql`
   mutation LogSlip($habitId: String!, $date: String!) {
     logSlip(habitId: $habitId, date: $date)

@@ -212,7 +212,17 @@
       "streakDays": "{days}g seri",
       "streakWeeks": "{weeks}h seri",
       "tryStarter": "2 dakikalık sürümü dene: {starter}",
-      "checkFailed": "Kaydedilemedi"
+      "checkFailed": "Kaydedilemedi",
+      "skip": "Muaf say",
+      "skipped": "Muaf"
+    },
+    "history": {
+      "title": "Geçmiş",
+      "done": "Yapıldı",
+      "excused": "Muaf",
+      "missed": "Kaçırıldı",
+      "clean": "Temiz",
+      "slip": "Kaçamak"
     },
     "strip": {
       "day": "Gün {day}/{total}",

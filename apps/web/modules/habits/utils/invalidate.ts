@@ -11,6 +11,7 @@ const HABITS_KEY_PREFIXES = [
   "GetDailyChecklist",
   "GetActiveSprint",
   "GetCompletedSprints",
+  "GetHabitChecks",
 ] as const;
 
 export function invalidateHabitsQueries(qc: QueryClient): Promise<void> {
