@@ -6,12 +6,13 @@ import {
   LayoutDashboard,
   Clock,
   CalendarDays,
+  ListChecks,
   SlidersHorizontal,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-type NavKey = "dashboard" | "track" | "history" | "preferences";
+type NavKey = "dashboard" | "track" | "history" | "habits" | "preferences";
 
 interface NavItem {
   titleKey: NavKey;
@@ -23,6 +24,7 @@ const primaryNav: NavItem[] = [
   { titleKey: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { titleKey: "track", href: "/track", icon: Clock },
   { titleKey: "history", href: "/history", icon: CalendarDays },
+  { titleKey: "habits", href: "/habits", icon: ListChecks },
 ];
 
 const secondaryNav: NavItem[] = [
