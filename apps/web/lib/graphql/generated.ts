@@ -61,6 +61,16 @@ export type Scalars = {
   JSON: { input: any; output: any };
 };
 
+export type ActiveSprintView = {
+  __typename?: "ActiveSprintView";
+  dayNumber?: Maybe<Scalars["Int"]["output"]>;
+  isPastEnd?: Maybe<Scalars["Boolean"]["output"]>;
+  members?: Maybe<Array<SprintMemberProgress>>;
+  overallPct?: Maybe<Scalars["Int"]["output"]>;
+  sprint?: Maybe<Sprint>;
+  totalDays?: Maybe<Scalars["Int"]["output"]>;
+};
+
 export type AdminOrganization = {
   __typename?: "AdminOrganization";
   createdAt?: Maybe<Scalars["DateTime"]["output"]>;
@@ -84,6 +94,12 @@ export type AdminUser = {
   organizationCount?: Maybe<Scalars["Int"]["output"]>;
 };
 
+export type BacklogPlanningHabit = {
+  __typename?: "BacklogPlanningHabit";
+  habit?: Maybe<Habit>;
+  lastOutcome?: Maybe<Scalars["String"]["output"]>;
+};
+
 export type BaseError = {
   __typename?: "BaseError";
   code?: Maybe<Scalars["String"]["output"]>;
@@ -104,12 +120,29 @@ export type BillingPlan = {
   priceYearly?: Maybe<Scalars["Int"]["output"]>;
 };
 
+export type ChecklistItem = {
+  __typename?: "ChecklistItem";
+  checkedToday?: Maybe<Scalars["Boolean"]["output"]>;
+  habit?: Maybe<Habit>;
+  needsAttention?: Maybe<Scalars["Boolean"]["output"]>;
+  slipCountToday?: Maybe<Scalars["Int"]["output"]>;
+  streak?: Maybe<Scalars["Int"]["output"]>;
+  thisWeekCount?: Maybe<Scalars["Int"]["output"]>;
+};
+
 export type CheckoutResult = {
   __typename?: "CheckoutResult";
   /** Stripe checkout session ID */
   sessionId?: Maybe<Scalars["String"]["output"]>;
   /** Stripe checkout URL to redirect user to */
   url?: Maybe<Scalars["String"]["output"]>;
+};
+
+export type CompletedSprintView = {
+  __typename?: "CompletedSprintView";
+  members?: Maybe<Array<SprintMemberProgress>>;
+  overallPct?: Maybe<Scalars["Int"]["output"]>;
+  sprint?: Maybe<Sprint>;
 };
 
 export type CreateEntryInput = {
@@ -222,6 +255,35 @@ export type GetSignedUrlInput = {
   fileId: Scalars["String"]["input"];
 };
 
+export type Habit = {
+  __typename?: "Habit";
+  createdAt?: Maybe<Scalars["DateTime"]["output"]>;
+  frequency?: Maybe<Scalars["String"]["output"]>;
+  id?: Maybe<Scalars["ID"]["output"]>;
+  identity?: Maybe<Scalars["String"]["output"]>;
+  intention?: Maybe<Scalars["String"]["output"]>;
+  name?: Maybe<Scalars["String"]["output"]>;
+  notes?: Maybe<Scalars["String"]["output"]>;
+  position?: Maybe<Scalars["Int"]["output"]>;
+  starter?: Maybe<Scalars["String"]["output"]>;
+  status?: Maybe<Scalars["String"]["output"]>;
+  timesPerWeek?: Maybe<Scalars["Int"]["output"]>;
+  type?: Maybe<Scalars["String"]["output"]>;
+  updatedAt?: Maybe<Scalars["DateTime"]["output"]>;
+};
+
+export type HabitInput = {
+  frequency?: InputMaybe<Scalars["String"]["input"]>;
+  identity?: InputMaybe<Scalars["String"]["input"]>;
+  intention?: InputMaybe<Scalars["String"]["input"]>;
+  name: Scalars["String"]["input"];
+  notes?: InputMaybe<Scalars["String"]["input"]>;
+  position?: InputMaybe<Scalars["Int"]["input"]>;
+  starter?: InputMaybe<Scalars["String"]["input"]>;
+  timesPerWeek?: InputMaybe<Scalars["Int"]["input"]>;
+  type: Scalars["String"]["input"];
+};
+
 export type HealthStatus = {
   __typename?: "HealthStatus";
   database?: Maybe<ServiceHealth>;
@@ -238,33 +300,53 @@ export enum MemberRole {
 
 export type Mutation = {
   __typename?: "Mutation";
+  addHabitToSprint?: Maybe<Scalars["Boolean"]["output"]>;
   adminAdjustCredits?: Maybe<CreditAdjustmentResult>;
+  completeRetro?: Maybe<Scalars["Boolean"]["output"]>;
   createCheckout?: Maybe<CheckoutResult>;
   createCreditCheckout?: Maybe<CheckoutResult>;
   createCustomerPortal?: Maybe<CustomerPortalResult>;
   createEntry?: Maybe<TimeEntry>;
+  createHabit?: Maybe<Habit>;
   createProject?: Maybe<Project>;
   createTask?: Maybe<Task>;
   deleteEntry?: Maybe<Scalars["Boolean"]["output"]>;
   deleteFile?: Maybe<Scalars["Boolean"]["output"]>;
   deleteProject?: Maybe<Scalars["Boolean"]["output"]>;
   deleteTask?: Maybe<Task>;
+  dropHabit?: Maybe<Habit>;
   getSignedUrl?: Maybe<SignedUrl>;
+  logSlip?: Maybe<Scalars["Int"]["output"]>;
   markAllNotificationsRead?: Maybe<Scalars["Boolean"]["output"]>;
   markNotificationRead?: Maybe<Notification>;
+  removeHabitFromSprint?: Maybe<Scalars["Boolean"]["output"]>;
+  startSprint?: Maybe<Sprint>;
   startTimer?: Maybe<TimeEntry>;
   stopTimer?: Maybe<TimeEntry>;
+  toggleCheck?: Maybe<Scalars["Boolean"]["output"]>;
+  undoSlip?: Maybe<Scalars["Int"]["output"]>;
   updateEntry?: Maybe<TimeEntry>;
+  updateHabit?: Maybe<Habit>;
   updateProject?: Maybe<Project>;
   updateTask?: Maybe<Task>;
   updateUserSettings?: Maybe<UserSettings>;
   uploadFile?: Maybe<File>;
 };
 
+export type MutationAddHabitToSprintArgs = {
+  habitId: Scalars["String"]["input"];
+};
+
 export type MutationAdminAdjustCreditsArgs = {
   amount: Scalars["Int"]["input"];
   organizationId: Scalars["String"]["input"];
   reason: Scalars["String"]["input"];
+};
+
+export type MutationCompleteRetroArgs = {
+  decisions: Array<RetroDecisionInput>;
+  retroNotes?: InputMaybe<Scalars["String"]["input"]>;
+  sprintId: Scalars["String"]["input"];
 };
 
 export type MutationCreateCheckoutArgs = {
@@ -278,6 +360,10 @@ export type MutationCreateCreditCheckoutArgs = {
 
 export type MutationCreateEntryArgs = {
   input: CreateEntryInput;
+};
+
+export type MutationCreateHabitArgs = {
+  input: HabitInput;
 };
 
 export type MutationCreateProjectArgs = {
@@ -304,21 +390,53 @@ export type MutationDeleteTaskArgs = {
   id: Scalars["String"]["input"];
 };
 
+export type MutationDropHabitArgs = {
+  id: Scalars["String"]["input"];
+};
+
 export type MutationGetSignedUrlArgs = {
   input: GetSignedUrlInput;
+};
+
+export type MutationLogSlipArgs = {
+  date: Scalars["String"]["input"];
+  habitId: Scalars["String"]["input"];
 };
 
 export type MutationMarkNotificationReadArgs = {
   notificationId: Scalars["String"]["input"];
 };
 
+export type MutationRemoveHabitFromSprintArgs = {
+  habitId: Scalars["String"]["input"];
+};
+
+export type MutationStartSprintArgs = {
+  input: StartSprintInput;
+};
+
 export type MutationStartTimerArgs = {
   input?: InputMaybe<StartTimerInput>;
+};
+
+export type MutationToggleCheckArgs = {
+  date: Scalars["String"]["input"];
+  habitId: Scalars["String"]["input"];
+};
+
+export type MutationUndoSlipArgs = {
+  date: Scalars["String"]["input"];
+  habitId: Scalars["String"]["input"];
 };
 
 export type MutationUpdateEntryArgs = {
   id: Scalars["String"]["input"];
   input: UpdateEntryInput;
+};
+
+export type MutationUpdateHabitArgs = {
+  id: Scalars["String"]["input"];
+  input: UpdateHabitInput;
 };
 
 export type MutationUpdateProjectArgs = {
@@ -392,19 +510,24 @@ export type Project = {
 
 export type Query = {
   __typename?: "Query";
+  activeSprint?: Maybe<ActiveSprintView>;
   adminDashboardStats?: Maybe<DashboardStats>;
   adminOrganizations?: Maybe<PaginatedOrganizations>;
   adminSystemHealth?: Maybe<HealthStatus>;
   adminUsers?: Maybe<PaginatedUsers>;
+  backlogForPlanning?: Maybe<Array<BacklogPlanningHabit>>;
   billingPlans?: Maybe<Array<BillingPlan>>;
+  completedSprints?: Maybe<Array<CompletedSprintView>>;
   creditBalance?: Maybe<CreditBalance>;
   creditHistory?: Maybe<Array<CreditTransaction>>;
   creditPacks?: Maybe<Array<CreditPack>>;
   currentEntry?: Maybe<TimeEntry>;
+  dailyChecklist?: Maybe<Array<ChecklistItem>>;
   dailyTotals?: Maybe<Array<DailyTotal>>;
   entries?: Maybe<Array<TimeEntry>>;
   file?: Maybe<File>;
   files?: Maybe<Array<File>>;
+  habits?: Maybe<Array<Habit>>;
   health?: Maybe<Scalars["String"]["output"]>;
   notifications?: Maybe<Array<Notification>>;
   project?: Maybe<Project>;
@@ -434,6 +557,10 @@ export type QueryCreditHistoryArgs = {
   limit?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
+export type QueryDailyChecklistArgs = {
+  date: Scalars["String"]["input"];
+};
+
 export type QueryDailyTotalsArgs = {
   from: Scalars["DateTime"]["input"];
   to: Scalars["DateTime"]["input"];
@@ -446,6 +573,10 @@ export type QueryEntriesArgs = {
 
 export type QueryFileArgs = {
   id: Scalars["String"]["input"];
+};
+
+export type QueryHabitsArgs = {
+  status?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type QueryNotificationsArgs = {
@@ -463,6 +594,11 @@ export type QueryTagTotalsArgs = {
 
 export type QueryTaskArgs = {
   id: Scalars["String"]["input"];
+};
+
+export type RetroDecisionInput = {
+  habitId: Scalars["String"]["input"];
+  outcome: Scalars["String"]["input"];
 };
 
 export type ServiceHealth = {
@@ -484,6 +620,30 @@ export type SignedUrl = {
   __typename?: "SignedUrl";
   expiresIn?: Maybe<Scalars["Int"]["output"]>;
   url?: Maybe<Scalars["String"]["output"]>;
+};
+
+export type Sprint = {
+  __typename?: "Sprint";
+  createdAt?: Maybe<Scalars["DateTime"]["output"]>;
+  endsOn?: Maybe<Scalars["String"]["output"]>;
+  id?: Maybe<Scalars["ID"]["output"]>;
+  name?: Maybe<Scalars["String"]["output"]>;
+  retroNotes?: Maybe<Scalars["String"]["output"]>;
+  startsOn?: Maybe<Scalars["String"]["output"]>;
+  status?: Maybe<Scalars["String"]["output"]>;
+};
+
+export type SprintMemberProgress = {
+  __typename?: "SprintMemberProgress";
+  completionPct?: Maybe<Scalars["Int"]["output"]>;
+  habit?: Maybe<Habit>;
+  outcome?: Maybe<Scalars["String"]["output"]>;
+};
+
+export type StartSprintInput = {
+  habitIds: Array<Scalars["String"]["input"]>;
+  lengthWeeks: Scalars["Int"]["input"];
+  name?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type StartTimerInput = {
@@ -538,6 +698,18 @@ export type UpdateEntryInput = {
   start?: InputMaybe<Scalars["DateTime"]["input"]>;
   stop?: InputMaybe<Scalars["DateTime"]["input"]>;
   tags?: InputMaybe<Array<Scalars["String"]["input"]>>;
+};
+
+export type UpdateHabitInput = {
+  frequency?: InputMaybe<Scalars["String"]["input"]>;
+  identity?: InputMaybe<Scalars["String"]["input"]>;
+  intention?: InputMaybe<Scalars["String"]["input"]>;
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  notes?: InputMaybe<Scalars["String"]["input"]>;
+  position?: InputMaybe<Scalars["Int"]["input"]>;
+  starter?: InputMaybe<Scalars["String"]["input"]>;
+  timesPerWeek?: InputMaybe<Scalars["Int"]["input"]>;
+  type?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type UpdateProjectInput = {
@@ -799,6 +971,353 @@ export type GetCreditPacksQuery = {
     name?: string | null;
     credits?: number | null;
     price?: number | null;
+  }> | null;
+};
+
+export type CreateHabitMutationVariables = Exact<{
+  input: HabitInput;
+}>;
+
+export type CreateHabitMutation = {
+  __typename?: "Mutation";
+  createHabit?: {
+    __typename?: "Habit";
+    id?: string | null;
+    name?: string | null;
+    type?: string | null;
+    frequency?: string | null;
+    timesPerWeek?: number | null;
+    status?: string | null;
+    position?: number | null;
+    intention?: string | null;
+    starter?: string | null;
+    identity?: string | null;
+    notes?: string | null;
+    createdAt?: any | null;
+    updatedAt?: any | null;
+  } | null;
+};
+
+export type UpdateHabitMutationVariables = Exact<{
+  id: Scalars["String"]["input"];
+  input: UpdateHabitInput;
+}>;
+
+export type UpdateHabitMutation = {
+  __typename?: "Mutation";
+  updateHabit?: {
+    __typename?: "Habit";
+    id?: string | null;
+    name?: string | null;
+    type?: string | null;
+    frequency?: string | null;
+    timesPerWeek?: number | null;
+    status?: string | null;
+    position?: number | null;
+    intention?: string | null;
+    starter?: string | null;
+    identity?: string | null;
+    notes?: string | null;
+    createdAt?: any | null;
+    updatedAt?: any | null;
+  } | null;
+};
+
+export type DropHabitMutationVariables = Exact<{
+  id: Scalars["String"]["input"];
+}>;
+
+export type DropHabitMutation = {
+  __typename?: "Mutation";
+  dropHabit?: {
+    __typename?: "Habit";
+    id?: string | null;
+    name?: string | null;
+    type?: string | null;
+    frequency?: string | null;
+    timesPerWeek?: number | null;
+    status?: string | null;
+    position?: number | null;
+    intention?: string | null;
+    starter?: string | null;
+    identity?: string | null;
+    notes?: string | null;
+    createdAt?: any | null;
+    updatedAt?: any | null;
+  } | null;
+};
+
+export type StartSprintMutationVariables = Exact<{
+  input: StartSprintInput;
+}>;
+
+export type StartSprintMutation = {
+  __typename?: "Mutation";
+  startSprint?: {
+    __typename?: "Sprint";
+    id?: string | null;
+    name?: string | null;
+    startsOn?: string | null;
+    endsOn?: string | null;
+    status?: string | null;
+    retroNotes?: string | null;
+    createdAt?: any | null;
+  } | null;
+};
+
+export type AddHabitToSprintMutationVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+}>;
+
+export type AddHabitToSprintMutation = {
+  __typename?: "Mutation";
+  addHabitToSprint?: boolean | null;
+};
+
+export type RemoveHabitFromSprintMutationVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+}>;
+
+export type RemoveHabitFromSprintMutation = {
+  __typename?: "Mutation";
+  removeHabitFromSprint?: boolean | null;
+};
+
+export type ToggleCheckMutationVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+  date: Scalars["String"]["input"];
+}>;
+
+export type ToggleCheckMutation = {
+  __typename?: "Mutation";
+  toggleCheck?: boolean | null;
+};
+
+export type LogSlipMutationVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+  date: Scalars["String"]["input"];
+}>;
+
+export type LogSlipMutation = {
+  __typename?: "Mutation";
+  logSlip?: number | null;
+};
+
+export type UndoSlipMutationVariables = Exact<{
+  habitId: Scalars["String"]["input"];
+  date: Scalars["String"]["input"];
+}>;
+
+export type UndoSlipMutation = {
+  __typename?: "Mutation";
+  undoSlip?: number | null;
+};
+
+export type CompleteRetroMutationVariables = Exact<{
+  sprintId: Scalars["String"]["input"];
+  decisions: Array<RetroDecisionInput> | RetroDecisionInput;
+  retroNotes?: InputMaybe<Scalars["String"]["input"]>;
+}>;
+
+export type CompleteRetroMutation = {
+  __typename?: "Mutation";
+  completeRetro?: boolean | null;
+};
+
+export type HabitFieldsFragment = {
+  __typename?: "Habit";
+  id?: string | null;
+  name?: string | null;
+  type?: string | null;
+  frequency?: string | null;
+  timesPerWeek?: number | null;
+  status?: string | null;
+  position?: number | null;
+  intention?: string | null;
+  starter?: string | null;
+  identity?: string | null;
+  notes?: string | null;
+  createdAt?: any | null;
+  updatedAt?: any | null;
+};
+
+export type SprintFieldsFragment = {
+  __typename?: "Sprint";
+  id?: string | null;
+  name?: string | null;
+  startsOn?: string | null;
+  endsOn?: string | null;
+  status?: string | null;
+  retroNotes?: string | null;
+  createdAt?: any | null;
+};
+
+export type GetHabitsQueryVariables = Exact<{
+  status?: InputMaybe<Scalars["String"]["input"]>;
+}>;
+
+export type GetHabitsQuery = {
+  __typename?: "Query";
+  habits?: Array<{
+    __typename?: "Habit";
+    id?: string | null;
+    name?: string | null;
+    type?: string | null;
+    frequency?: string | null;
+    timesPerWeek?: number | null;
+    status?: string | null;
+    position?: number | null;
+    intention?: string | null;
+    starter?: string | null;
+    identity?: string | null;
+    notes?: string | null;
+    createdAt?: any | null;
+    updatedAt?: any | null;
+  }> | null;
+};
+
+export type GetBacklogForPlanningQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type GetBacklogForPlanningQuery = {
+  __typename?: "Query";
+  backlogForPlanning?: Array<{
+    __typename?: "BacklogPlanningHabit";
+    lastOutcome?: string | null;
+    habit?: {
+      __typename?: "Habit";
+      id?: string | null;
+      name?: string | null;
+      type?: string | null;
+      frequency?: string | null;
+      timesPerWeek?: number | null;
+      status?: string | null;
+      position?: number | null;
+      intention?: string | null;
+      starter?: string | null;
+      identity?: string | null;
+      notes?: string | null;
+      createdAt?: any | null;
+      updatedAt?: any | null;
+    } | null;
+  }> | null;
+};
+
+export type GetDailyChecklistQueryVariables = Exact<{
+  date: Scalars["String"]["input"];
+}>;
+
+export type GetDailyChecklistQuery = {
+  __typename?: "Query";
+  dailyChecklist?: Array<{
+    __typename?: "ChecklistItem";
+    checkedToday?: boolean | null;
+    slipCountToday?: number | null;
+    streak?: number | null;
+    thisWeekCount?: number | null;
+    needsAttention?: boolean | null;
+    habit?: {
+      __typename?: "Habit";
+      id?: string | null;
+      name?: string | null;
+      type?: string | null;
+      frequency?: string | null;
+      timesPerWeek?: number | null;
+      status?: string | null;
+      position?: number | null;
+      intention?: string | null;
+      starter?: string | null;
+      identity?: string | null;
+      notes?: string | null;
+      createdAt?: any | null;
+      updatedAt?: any | null;
+    } | null;
+  }> | null;
+};
+
+export type GetActiveSprintQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetActiveSprintQuery = {
+  __typename?: "Query";
+  activeSprint?: {
+    __typename?: "ActiveSprintView";
+    dayNumber?: number | null;
+    totalDays?: number | null;
+    overallPct?: number | null;
+    isPastEnd?: boolean | null;
+    sprint?: {
+      __typename?: "Sprint";
+      id?: string | null;
+      name?: string | null;
+      startsOn?: string | null;
+      endsOn?: string | null;
+      status?: string | null;
+      retroNotes?: string | null;
+      createdAt?: any | null;
+    } | null;
+    members?: Array<{
+      __typename?: "SprintMemberProgress";
+      completionPct?: number | null;
+      outcome?: string | null;
+      habit?: {
+        __typename?: "Habit";
+        id?: string | null;
+        name?: string | null;
+        type?: string | null;
+        frequency?: string | null;
+        timesPerWeek?: number | null;
+        status?: string | null;
+        position?: number | null;
+        intention?: string | null;
+        starter?: string | null;
+        identity?: string | null;
+        notes?: string | null;
+        createdAt?: any | null;
+        updatedAt?: any | null;
+      } | null;
+    }> | null;
+  } | null;
+};
+
+export type GetCompletedSprintsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetCompletedSprintsQuery = {
+  __typename?: "Query";
+  completedSprints?: Array<{
+    __typename?: "CompletedSprintView";
+    overallPct?: number | null;
+    sprint?: {
+      __typename?: "Sprint";
+      id?: string | null;
+      name?: string | null;
+      startsOn?: string | null;
+      endsOn?: string | null;
+      status?: string | null;
+      retroNotes?: string | null;
+      createdAt?: any | null;
+    } | null;
+    members?: Array<{
+      __typename?: "SprintMemberProgress";
+      completionPct?: number | null;
+      outcome?: string | null;
+      habit?: {
+        __typename?: "Habit";
+        id?: string | null;
+        name?: string | null;
+        type?: string | null;
+        frequency?: string | null;
+        timesPerWeek?: number | null;
+        status?: string | null;
+        position?: number | null;
+        intention?: string | null;
+        starter?: string | null;
+        identity?: string | null;
+        notes?: string | null;
+        createdAt?: any | null;
+        updatedAt?: any | null;
+      } | null;
+    }> | null;
   }> | null;
 };
 
@@ -1224,6 +1743,34 @@ export type GetUserSettingsQuery = {
   } | null;
 };
 
+export const HabitFieldsFragmentDoc = `
+    fragment HabitFields on Habit {
+  id
+  name
+  type
+  frequency
+  timesPerWeek
+  status
+  position
+  intention
+  starter
+  identity
+  notes
+  createdAt
+  updatedAt
+}
+    `;
+export const SprintFieldsFragmentDoc = `
+    fragment SprintFields on Sprint {
+  id
+  name
+  startsOn
+  endsOn
+  status
+  retroNotes
+  createdAt
+}
+    `;
 export const TimeEntryFieldsFragmentDoc = `
     fragment TimeEntryFields on TimeEntry {
   id
@@ -2218,6 +2765,858 @@ useInfiniteGetCreditPacksQuery.getKey = (
 useGetCreditPacksQuery.fetcher = (variables?: GetCreditPacksQueryVariables) =>
   fetcher<GetCreditPacksQuery, GetCreditPacksQueryVariables>(
     GetCreditPacksDocument,
+    variables,
+  );
+
+export const CreateHabitDocument = `
+    mutation CreateHabit($input: HabitInput!) {
+  createHabit(input: $input) {
+    ...HabitFields
+  }
+}
+    ${HabitFieldsFragmentDoc}`;
+
+export const useCreateHabitMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    CreateHabitMutation,
+    TError,
+    CreateHabitMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    CreateHabitMutation,
+    TError,
+    CreateHabitMutationVariables,
+    TContext
+  >({
+    mutationKey: ["CreateHabit"],
+    mutationFn: (variables?: CreateHabitMutationVariables) =>
+      fetcher<CreateHabitMutation, CreateHabitMutationVariables>(
+        CreateHabitDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useCreateHabitMutation.fetcher = (variables: CreateHabitMutationVariables) =>
+  fetcher<CreateHabitMutation, CreateHabitMutationVariables>(
+    CreateHabitDocument,
+    variables,
+  );
+
+export const UpdateHabitDocument = `
+    mutation UpdateHabit($id: String!, $input: UpdateHabitInput!) {
+  updateHabit(id: $id, input: $input) {
+    ...HabitFields
+  }
+}
+    ${HabitFieldsFragmentDoc}`;
+
+export const useUpdateHabitMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    UpdateHabitMutation,
+    TError,
+    UpdateHabitMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    UpdateHabitMutation,
+    TError,
+    UpdateHabitMutationVariables,
+    TContext
+  >({
+    mutationKey: ["UpdateHabit"],
+    mutationFn: (variables?: UpdateHabitMutationVariables) =>
+      fetcher<UpdateHabitMutation, UpdateHabitMutationVariables>(
+        UpdateHabitDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useUpdateHabitMutation.fetcher = (variables: UpdateHabitMutationVariables) =>
+  fetcher<UpdateHabitMutation, UpdateHabitMutationVariables>(
+    UpdateHabitDocument,
+    variables,
+  );
+
+export const DropHabitDocument = `
+    mutation DropHabit($id: String!) {
+  dropHabit(id: $id) {
+    ...HabitFields
+  }
+}
+    ${HabitFieldsFragmentDoc}`;
+
+export const useDropHabitMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    DropHabitMutation,
+    TError,
+    DropHabitMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    DropHabitMutation,
+    TError,
+    DropHabitMutationVariables,
+    TContext
+  >({
+    mutationKey: ["DropHabit"],
+    mutationFn: (variables?: DropHabitMutationVariables) =>
+      fetcher<DropHabitMutation, DropHabitMutationVariables>(
+        DropHabitDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useDropHabitMutation.fetcher = (variables: DropHabitMutationVariables) =>
+  fetcher<DropHabitMutation, DropHabitMutationVariables>(
+    DropHabitDocument,
+    variables,
+  );
+
+export const StartSprintDocument = `
+    mutation StartSprint($input: StartSprintInput!) {
+  startSprint(input: $input) {
+    ...SprintFields
+  }
+}
+    ${SprintFieldsFragmentDoc}`;
+
+export const useStartSprintMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    StartSprintMutation,
+    TError,
+    StartSprintMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    StartSprintMutation,
+    TError,
+    StartSprintMutationVariables,
+    TContext
+  >({
+    mutationKey: ["StartSprint"],
+    mutationFn: (variables?: StartSprintMutationVariables) =>
+      fetcher<StartSprintMutation, StartSprintMutationVariables>(
+        StartSprintDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useStartSprintMutation.fetcher = (variables: StartSprintMutationVariables) =>
+  fetcher<StartSprintMutation, StartSprintMutationVariables>(
+    StartSprintDocument,
+    variables,
+  );
+
+export const AddHabitToSprintDocument = `
+    mutation AddHabitToSprint($habitId: String!) {
+  addHabitToSprint(habitId: $habitId)
+}
+    `;
+
+export const useAddHabitToSprintMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    AddHabitToSprintMutation,
+    TError,
+    AddHabitToSprintMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    AddHabitToSprintMutation,
+    TError,
+    AddHabitToSprintMutationVariables,
+    TContext
+  >({
+    mutationKey: ["AddHabitToSprint"],
+    mutationFn: (variables?: AddHabitToSprintMutationVariables) =>
+      fetcher<AddHabitToSprintMutation, AddHabitToSprintMutationVariables>(
+        AddHabitToSprintDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useAddHabitToSprintMutation.fetcher = (
+  variables: AddHabitToSprintMutationVariables,
+) =>
+  fetcher<AddHabitToSprintMutation, AddHabitToSprintMutationVariables>(
+    AddHabitToSprintDocument,
+    variables,
+  );
+
+export const RemoveHabitFromSprintDocument = `
+    mutation RemoveHabitFromSprint($habitId: String!) {
+  removeHabitFromSprint(habitId: $habitId)
+}
+    `;
+
+export const useRemoveHabitFromSprintMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    RemoveHabitFromSprintMutation,
+    TError,
+    RemoveHabitFromSprintMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    RemoveHabitFromSprintMutation,
+    TError,
+    RemoveHabitFromSprintMutationVariables,
+    TContext
+  >({
+    mutationKey: ["RemoveHabitFromSprint"],
+    mutationFn: (variables?: RemoveHabitFromSprintMutationVariables) =>
+      fetcher<
+        RemoveHabitFromSprintMutation,
+        RemoveHabitFromSprintMutationVariables
+      >(RemoveHabitFromSprintDocument, variables)(),
+    ...options,
+  });
+};
+
+useRemoveHabitFromSprintMutation.fetcher = (
+  variables: RemoveHabitFromSprintMutationVariables,
+) =>
+  fetcher<
+    RemoveHabitFromSprintMutation,
+    RemoveHabitFromSprintMutationVariables
+  >(RemoveHabitFromSprintDocument, variables);
+
+export const ToggleCheckDocument = `
+    mutation ToggleCheck($habitId: String!, $date: String!) {
+  toggleCheck(habitId: $habitId, date: $date)
+}
+    `;
+
+export const useToggleCheckMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    ToggleCheckMutation,
+    TError,
+    ToggleCheckMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    ToggleCheckMutation,
+    TError,
+    ToggleCheckMutationVariables,
+    TContext
+  >({
+    mutationKey: ["ToggleCheck"],
+    mutationFn: (variables?: ToggleCheckMutationVariables) =>
+      fetcher<ToggleCheckMutation, ToggleCheckMutationVariables>(
+        ToggleCheckDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useToggleCheckMutation.fetcher = (variables: ToggleCheckMutationVariables) =>
+  fetcher<ToggleCheckMutation, ToggleCheckMutationVariables>(
+    ToggleCheckDocument,
+    variables,
+  );
+
+export const LogSlipDocument = `
+    mutation LogSlip($habitId: String!, $date: String!) {
+  logSlip(habitId: $habitId, date: $date)
+}
+    `;
+
+export const useLogSlipMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    LogSlipMutation,
+    TError,
+    LogSlipMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    LogSlipMutation,
+    TError,
+    LogSlipMutationVariables,
+    TContext
+  >({
+    mutationKey: ["LogSlip"],
+    mutationFn: (variables?: LogSlipMutationVariables) =>
+      fetcher<LogSlipMutation, LogSlipMutationVariables>(
+        LogSlipDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useLogSlipMutation.fetcher = (variables: LogSlipMutationVariables) =>
+  fetcher<LogSlipMutation, LogSlipMutationVariables>(
+    LogSlipDocument,
+    variables,
+  );
+
+export const UndoSlipDocument = `
+    mutation UndoSlip($habitId: String!, $date: String!) {
+  undoSlip(habitId: $habitId, date: $date)
+}
+    `;
+
+export const useUndoSlipMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    UndoSlipMutation,
+    TError,
+    UndoSlipMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    UndoSlipMutation,
+    TError,
+    UndoSlipMutationVariables,
+    TContext
+  >({
+    mutationKey: ["UndoSlip"],
+    mutationFn: (variables?: UndoSlipMutationVariables) =>
+      fetcher<UndoSlipMutation, UndoSlipMutationVariables>(
+        UndoSlipDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useUndoSlipMutation.fetcher = (variables: UndoSlipMutationVariables) =>
+  fetcher<UndoSlipMutation, UndoSlipMutationVariables>(
+    UndoSlipDocument,
+    variables,
+  );
+
+export const CompleteRetroDocument = `
+    mutation CompleteRetro($sprintId: String!, $decisions: [RetroDecisionInput!]!, $retroNotes: String) {
+  completeRetro(
+    sprintId: $sprintId
+    decisions: $decisions
+    retroNotes: $retroNotes
+  )
+}
+    `;
+
+export const useCompleteRetroMutation = <TError = unknown, TContext = unknown>(
+  options?: UseMutationOptions<
+    CompleteRetroMutation,
+    TError,
+    CompleteRetroMutationVariables,
+    TContext
+  >,
+) => {
+  return useMutation<
+    CompleteRetroMutation,
+    TError,
+    CompleteRetroMutationVariables,
+    TContext
+  >({
+    mutationKey: ["CompleteRetro"],
+    mutationFn: (variables?: CompleteRetroMutationVariables) =>
+      fetcher<CompleteRetroMutation, CompleteRetroMutationVariables>(
+        CompleteRetroDocument,
+        variables,
+      )(),
+    ...options,
+  });
+};
+
+useCompleteRetroMutation.fetcher = (
+  variables: CompleteRetroMutationVariables,
+) =>
+  fetcher<CompleteRetroMutation, CompleteRetroMutationVariables>(
+    CompleteRetroDocument,
+    variables,
+  );
+
+export const GetHabitsDocument = `
+    query GetHabits($status: String) {
+  habits(status: $status) {
+    ...HabitFields
+  }
+}
+    ${HabitFieldsFragmentDoc}`;
+
+export const useGetHabitsQuery = <TData = GetHabitsQuery, TError = unknown>(
+  variables?: GetHabitsQueryVariables,
+  options?: Omit<UseQueryOptions<GetHabitsQuery, TError, TData>, "queryKey"> & {
+    queryKey?: UseQueryOptions<GetHabitsQuery, TError, TData>["queryKey"];
+  },
+) => {
+  return useQuery<GetHabitsQuery, TError, TData>({
+    queryKey:
+      variables === undefined ? ["GetHabits"] : ["GetHabits", variables],
+    queryFn: fetcher<GetHabitsQuery, GetHabitsQueryVariables>(
+      GetHabitsDocument,
+      variables,
+    ),
+    ...options,
+  });
+};
+
+useGetHabitsQuery.getKey = (variables?: GetHabitsQueryVariables) =>
+  variables === undefined ? ["GetHabits"] : ["GetHabits", variables];
+
+export const useInfiniteGetHabitsQuery = <
+  TData = InfiniteData<GetHabitsQuery>,
+  TError = unknown,
+>(
+  variables: GetHabitsQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetHabitsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetHabitsQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetHabitsQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey:
+          (optionsQueryKey ?? variables === undefined)
+            ? ["GetHabits.infinite"]
+            : ["GetHabits.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetHabitsQuery, GetHabitsQueryVariables>(GetHabitsDocument, {
+            ...variables,
+            ...(metaData.pageParam ?? {}),
+          })(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetHabitsQuery.getKey = (variables?: GetHabitsQueryVariables) =>
+  variables === undefined
+    ? ["GetHabits.infinite"]
+    : ["GetHabits.infinite", variables];
+
+useGetHabitsQuery.fetcher = (variables?: GetHabitsQueryVariables) =>
+  fetcher<GetHabitsQuery, GetHabitsQueryVariables>(
+    GetHabitsDocument,
+    variables,
+  );
+
+export const GetBacklogForPlanningDocument = `
+    query GetBacklogForPlanning {
+  backlogForPlanning {
+    habit {
+      ...HabitFields
+    }
+    lastOutcome
+  }
+}
+    ${HabitFieldsFragmentDoc}`;
+
+export const useGetBacklogForPlanningQuery = <
+  TData = GetBacklogForPlanningQuery,
+  TError = unknown,
+>(
+  variables?: GetBacklogForPlanningQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetBacklogForPlanningQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<
+      GetBacklogForPlanningQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useQuery<GetBacklogForPlanningQuery, TError, TData>({
+    queryKey:
+      variables === undefined
+        ? ["GetBacklogForPlanning"]
+        : ["GetBacklogForPlanning", variables],
+    queryFn: fetcher<
+      GetBacklogForPlanningQuery,
+      GetBacklogForPlanningQueryVariables
+    >(GetBacklogForPlanningDocument, variables),
+    ...options,
+  });
+};
+
+useGetBacklogForPlanningQuery.getKey = (
+  variables?: GetBacklogForPlanningQueryVariables,
+) =>
+  variables === undefined
+    ? ["GetBacklogForPlanning"]
+    : ["GetBacklogForPlanning", variables];
+
+export const useInfiniteGetBacklogForPlanningQuery = <
+  TData = InfiniteData<GetBacklogForPlanningQuery>,
+  TError = unknown,
+>(
+  variables: GetBacklogForPlanningQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetBacklogForPlanningQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetBacklogForPlanningQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetBacklogForPlanningQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey:
+          (optionsQueryKey ?? variables === undefined)
+            ? ["GetBacklogForPlanning.infinite"]
+            : ["GetBacklogForPlanning.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<
+            GetBacklogForPlanningQuery,
+            GetBacklogForPlanningQueryVariables
+          >(GetBacklogForPlanningDocument, {
+            ...variables,
+            ...(metaData.pageParam ?? {}),
+          })(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetBacklogForPlanningQuery.getKey = (
+  variables?: GetBacklogForPlanningQueryVariables,
+) =>
+  variables === undefined
+    ? ["GetBacklogForPlanning.infinite"]
+    : ["GetBacklogForPlanning.infinite", variables];
+
+useGetBacklogForPlanningQuery.fetcher = (
+  variables?: GetBacklogForPlanningQueryVariables,
+) =>
+  fetcher<GetBacklogForPlanningQuery, GetBacklogForPlanningQueryVariables>(
+    GetBacklogForPlanningDocument,
+    variables,
+  );
+
+export const GetDailyChecklistDocument = `
+    query GetDailyChecklist($date: String!) {
+  dailyChecklist(date: $date) {
+    habit {
+      ...HabitFields
+    }
+    checkedToday
+    slipCountToday
+    streak
+    thisWeekCount
+    needsAttention
+  }
+}
+    ${HabitFieldsFragmentDoc}`;
+
+export const useGetDailyChecklistQuery = <
+  TData = GetDailyChecklistQuery,
+  TError = unknown,
+>(
+  variables: GetDailyChecklistQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetDailyChecklistQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<
+      GetDailyChecklistQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useQuery<GetDailyChecklistQuery, TError, TData>({
+    queryKey: ["GetDailyChecklist", variables],
+    queryFn: fetcher<GetDailyChecklistQuery, GetDailyChecklistQueryVariables>(
+      GetDailyChecklistDocument,
+      variables,
+    ),
+    ...options,
+  });
+};
+
+useGetDailyChecklistQuery.getKey = (
+  variables: GetDailyChecklistQueryVariables,
+) => ["GetDailyChecklist", variables];
+
+export const useInfiniteGetDailyChecklistQuery = <
+  TData = InfiniteData<GetDailyChecklistQuery>,
+  TError = unknown,
+>(
+  variables: GetDailyChecklistQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetDailyChecklistQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetDailyChecklistQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetDailyChecklistQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey: optionsQueryKey ?? ["GetDailyChecklist.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetDailyChecklistQuery, GetDailyChecklistQueryVariables>(
+            GetDailyChecklistDocument,
+            { ...variables, ...(metaData.pageParam ?? {}) },
+          )(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetDailyChecklistQuery.getKey = (
+  variables: GetDailyChecklistQueryVariables,
+) => ["GetDailyChecklist.infinite", variables];
+
+useGetDailyChecklistQuery.fetcher = (
+  variables: GetDailyChecklistQueryVariables,
+) =>
+  fetcher<GetDailyChecklistQuery, GetDailyChecklistQueryVariables>(
+    GetDailyChecklistDocument,
+    variables,
+  );
+
+export const GetActiveSprintDocument = `
+    query GetActiveSprint {
+  activeSprint {
+    sprint {
+      ...SprintFields
+    }
+    dayNumber
+    totalDays
+    overallPct
+    isPastEnd
+    members {
+      habit {
+        ...HabitFields
+      }
+      completionPct
+      outcome
+    }
+  }
+}
+    ${SprintFieldsFragmentDoc}
+${HabitFieldsFragmentDoc}`;
+
+export const useGetActiveSprintQuery = <
+  TData = GetActiveSprintQuery,
+  TError = unknown,
+>(
+  variables?: GetActiveSprintQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetActiveSprintQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<GetActiveSprintQuery, TError, TData>["queryKey"];
+  },
+) => {
+  return useQuery<GetActiveSprintQuery, TError, TData>({
+    queryKey:
+      variables === undefined
+        ? ["GetActiveSprint"]
+        : ["GetActiveSprint", variables],
+    queryFn: fetcher<GetActiveSprintQuery, GetActiveSprintQueryVariables>(
+      GetActiveSprintDocument,
+      variables,
+    ),
+    ...options,
+  });
+};
+
+useGetActiveSprintQuery.getKey = (variables?: GetActiveSprintQueryVariables) =>
+  variables === undefined
+    ? ["GetActiveSprint"]
+    : ["GetActiveSprint", variables];
+
+export const useInfiniteGetActiveSprintQuery = <
+  TData = InfiniteData<GetActiveSprintQuery>,
+  TError = unknown,
+>(
+  variables: GetActiveSprintQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetActiveSprintQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetActiveSprintQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetActiveSprintQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey:
+          (optionsQueryKey ?? variables === undefined)
+            ? ["GetActiveSprint.infinite"]
+            : ["GetActiveSprint.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetActiveSprintQuery, GetActiveSprintQueryVariables>(
+            GetActiveSprintDocument,
+            { ...variables, ...(metaData.pageParam ?? {}) },
+          )(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetActiveSprintQuery.getKey = (
+  variables?: GetActiveSprintQueryVariables,
+) =>
+  variables === undefined
+    ? ["GetActiveSprint.infinite"]
+    : ["GetActiveSprint.infinite", variables];
+
+useGetActiveSprintQuery.fetcher = (variables?: GetActiveSprintQueryVariables) =>
+  fetcher<GetActiveSprintQuery, GetActiveSprintQueryVariables>(
+    GetActiveSprintDocument,
+    variables,
+  );
+
+export const GetCompletedSprintsDocument = `
+    query GetCompletedSprints {
+  completedSprints {
+    sprint {
+      ...SprintFields
+    }
+    overallPct
+    members {
+      habit {
+        ...HabitFields
+      }
+      completionPct
+      outcome
+    }
+  }
+}
+    ${SprintFieldsFragmentDoc}
+${HabitFieldsFragmentDoc}`;
+
+export const useGetCompletedSprintsQuery = <
+  TData = GetCompletedSprintsQuery,
+  TError = unknown,
+>(
+  variables?: GetCompletedSprintsQueryVariables,
+  options?: Omit<
+    UseQueryOptions<GetCompletedSprintsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<
+      GetCompletedSprintsQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useQuery<GetCompletedSprintsQuery, TError, TData>({
+    queryKey:
+      variables === undefined
+        ? ["GetCompletedSprints"]
+        : ["GetCompletedSprints", variables],
+    queryFn: fetcher<
+      GetCompletedSprintsQuery,
+      GetCompletedSprintsQueryVariables
+    >(GetCompletedSprintsDocument, variables),
+    ...options,
+  });
+};
+
+useGetCompletedSprintsQuery.getKey = (
+  variables?: GetCompletedSprintsQueryVariables,
+) =>
+  variables === undefined
+    ? ["GetCompletedSprints"]
+    : ["GetCompletedSprints", variables];
+
+export const useInfiniteGetCompletedSprintsQuery = <
+  TData = InfiniteData<GetCompletedSprintsQuery>,
+  TError = unknown,
+>(
+  variables: GetCompletedSprintsQueryVariables,
+  options: Omit<
+    UseInfiniteQueryOptions<GetCompletedSprintsQuery, TError, TData>,
+    "queryKey"
+  > & {
+    queryKey?: UseInfiniteQueryOptions<
+      GetCompletedSprintsQuery,
+      TError,
+      TData
+    >["queryKey"];
+  },
+) => {
+  return useInfiniteQuery<GetCompletedSprintsQuery, TError, TData>(
+    (() => {
+      const { queryKey: optionsQueryKey, ...restOptions } = options;
+      return {
+        queryKey:
+          (optionsQueryKey ?? variables === undefined)
+            ? ["GetCompletedSprints.infinite"]
+            : ["GetCompletedSprints.infinite", variables],
+        queryFn: (metaData) =>
+          fetcher<GetCompletedSprintsQuery, GetCompletedSprintsQueryVariables>(
+            GetCompletedSprintsDocument,
+            { ...variables, ...(metaData.pageParam ?? {}) },
+          )(),
+        ...restOptions,
+      };
+    })(),
+  );
+};
+
+useInfiniteGetCompletedSprintsQuery.getKey = (
+  variables?: GetCompletedSprintsQueryVariables,
+) =>
+  variables === undefined
+    ? ["GetCompletedSprints.infinite"]
+    : ["GetCompletedSprints.infinite", variables];
+
+useGetCompletedSprintsQuery.fetcher = (
+  variables?: GetCompletedSprintsQueryVariables,
+) =>
+  fetcher<GetCompletedSprintsQuery, GetCompletedSprintsQueryVariables>(
+    GetCompletedSprintsDocument,
     variables,
   );
 

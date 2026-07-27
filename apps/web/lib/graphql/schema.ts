@@ -15,6 +15,7 @@ import "@/modules/notifications/api";
 import "@/modules/admin/api";
 import "@/modules/user-settings/api";
 import "@/modules/time-tracking/api";
+import "@/modules/habits/api";
 
 // Build and export the schema
 export const schema = builder.toSchema();
