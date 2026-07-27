@@ -207,3 +207,219 @@ export async function dropHabit(
     .returning();
   return row;
 }
+
+// ----- Daily checks -----
+
+const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
+/** Streak/attention computations read at most this many days of history. */
+const CHECK_HISTORY_DAYS = 120;
+
+function assertValidDateKey(dateKey: string, today: string): void {
+  if (!DATE_KEY_RE.test(dateKey)) {
+    throw new ValidationError(`Invalid date: ${dateKey} (expected YYYY-MM-DD)`);
+  }
+  if (dateKey > today) throw new ValidationError("Cannot check a future date");
+}
+
+function assertCheckable(habit: Habit): void {
+  if (habit.status !== "in_sprint" && habit.status !== "established") {
+    throw new HabitNotCheckableError();
+  }
+}
+
+/** Toggle a good habit's done-mark for a day. Returns the new state. */
+export async function toggleCheck(
+  userId: string,
+  organizationId: string,
+  habitId: string,
+  dateKey: string,
+  timezone: string
+): Promise<boolean> {
+  const habit = await getOwnedHabit(userId, organizationId, habitId);
+  if (habit.type !== "good") {
+    throw new InvalidHabitStateError("Bad habits track slips — use logSlip");
+  }
+  assertCheckable(habit);
+  assertValidDateKey(dateKey, todayKey(timezone));
+
+  const existing = await db
+    .select()
+    .from(habitChecks)
+    .where(and(eq(habitChecks.habitId, habitId), eq(habitChecks.date, dateKey)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    await db.delete(habitChecks).where(eq(habitChecks.id, existing[0].id));
+    return false;
+  }
+  await db.insert(habitChecks).values({
+    userId,
+    organizationId,
+    habitId,
+    date: dateKey,
+    kind: "done",
+    count: 1,
+  });
+  return true;
+}
+
+/** Record (or increment) a slip on a bad habit. Returns the day's new count. */
+export async function logSlip(
+  userId: string,
+  organizationId: string,
+  habitId: string,
+  dateKey: string,
+  timezone: string
+): Promise<number> {
+  const habit = await getOwnedHabit(userId, organizationId, habitId);
+  if (habit.type !== "bad") {
+    throw new InvalidHabitStateError("Good habits track dones — use toggleCheck");
+  }
+  assertCheckable(habit);
+  assertValidDateKey(dateKey, todayKey(timezone));
+
+  const [row] = await db
+    .insert(habitChecks)
+    .values({ userId, organizationId, habitId, date: dateKey, kind: "slip", count: 1 })
+    .onConflictDoUpdate({
+      target: [habitChecks.habitId, habitChecks.date],
+      set: { count: sql`${habitChecks.count} + 1` },
+    })
+    .returning();
+  return row.count;
+}
+
+/** Decrement (or remove) a slip. Returns the remaining count. */
+export async function undoSlip(
+  userId: string,
+  organizationId: string,
+  habitId: string,
+  dateKey: string,
+  timezone: string
+): Promise<number> {
+  const habit = await getOwnedHabit(userId, organizationId, habitId);
+  if (habit.type !== "bad") {
+    throw new InvalidHabitStateError("Only bad habits have slips");
+  }
+  assertValidDateKey(dateKey, todayKey(timezone));
+
+  const existing = await db
+    .select()
+    .from(habitChecks)
+    .where(and(eq(habitChecks.habitId, habitId), eq(habitChecks.date, dateKey)))
+    .limit(1);
+  if (existing.length === 0) return 0;
+
+  if (existing[0].count > 1) {
+    const [row] = await db
+      .update(habitChecks)
+      .set({ count: existing[0].count - 1 })
+      .where(eq(habitChecks.id, existing[0].id))
+      .returning();
+    return row.count;
+  }
+  await db.delete(habitChecks).where(eq(habitChecks.id, existing[0].id));
+  return 0;
+}
+
+/** For bad habits with no slips yet: days-clean counts from the start of the
+ *  earliest sprint that ever contained the habit (fallback: creation day). */
+async function getTrackingStarts(habitIds: string[]): Promise<Map<string, string>> {
+  if (habitIds.length === 0) return new Map();
+  const rows = await db
+    .select({
+      habitId: sprintHabits.habitId,
+      start: sql<string>`min(${sprints.startsOn})`,
+    })
+    .from(sprintHabits)
+    .innerJoin(sprints, eq(sprints.id, sprintHabits.sprintId))
+    .where(inArray(sprintHabits.habitId, habitIds))
+    .groupBy(sprintHabits.habitId);
+  return new Map(rows.map((r) => [r.habitId, r.start]));
+}
+
+/** The Today screen's data: all checkable habits with their state for `dateKey`. */
+export async function getDailyChecklist(
+  userId: string,
+  organizationId: string,
+  dateKey: string,
+  timezone: string,
+  weekStartsOn: 0 | 1
+): Promise<ChecklistItem[]> {
+  assertValidDateKey(dateKey, todayKey(timezone));
+
+  const active = await db
+    .select()
+    .from(habits)
+    .where(
+      and(
+        eq(habits.userId, userId),
+        eq(habits.organizationId, organizationId),
+        inArray(habits.status, ["in_sprint", "established"])
+      )
+    )
+    .orderBy(asc(habits.position), asc(habits.createdAt));
+  if (active.length === 0) return [];
+
+  const habitIds = active.map((h) => h.id);
+  const floor = addDays(dateKey, -CHECK_HISTORY_DAYS);
+  const checkRows = await db
+    .select()
+    .from(habitChecks)
+    .where(
+      and(
+        eq(habitChecks.userId, userId),
+        eq(habitChecks.organizationId, organizationId),
+        inArray(habitChecks.habitId, habitIds),
+        gte(habitChecks.date, floor),
+        lte(habitChecks.date, dateKey)
+      )
+    );
+  const trackingStarts = await getTrackingStarts(
+    active.filter((h) => h.type === "bad").map((h) => h.id)
+  );
+
+  const items = active.map((habit) => {
+    const mine: CheckLike[] = checkRows
+      .filter((c) => c.habitId === habit.id)
+      .map((c) => ({ date: c.date, kind: c.kind as "done" | "slip", count: c.count }));
+    const todayRow = mine.find((c) => c.date === dateKey);
+    const scoring: ScoringHabit = {
+      type: habit.type as "good" | "bad",
+      frequency: habit.frequency as "daily" | "weekly",
+      timesPerWeek: habit.timesPerWeek,
+    };
+
+    let streak = 0;
+    let thisWeekCount = 0;
+    if (habit.type === "bad") {
+      const slipDates = mine.filter((c) => c.kind === "slip").map((c) => c.date);
+      const trackingStart =
+        trackingStarts.get(habit.id) ?? dateKeyInTz(habit.createdAt, timezone);
+      streak = computeDaysClean(slipDates, trackingStart, dateKey);
+    } else if (habit.frequency === "weekly" && habit.timesPerWeek) {
+      const doneDates = mine.filter((c) => c.kind === "done").map((c) => c.date);
+      const weekly = computeWeeklyStreak(doneDates, dateKey, habit.timesPerWeek, weekStartsOn);
+      streak = weekly.weeks;
+      thisWeekCount = weekly.thisWeekCount;
+    } else {
+      const doneDates = new Set(mine.filter((c) => c.kind === "done").map((c) => c.date));
+      streak = computeDailyStreak(doneDates, dateKey);
+    }
+
+    return {
+      habit,
+      checkedToday: habit.type === "good" && todayRow?.kind === "done",
+      slipCountToday: habit.type === "bad" ? (todayRow?.count ?? 0) : 0,
+      streak,
+      thisWeekCount,
+      needsAttention: needsAttention(scoring, mine, dateKey, weekStartsOn),
+    };
+  });
+
+  // in_sprint first, established after; stable within each group.
+  return [
+    ...items.filter((i) => i.habit.status === "in_sprint"),
+    ...items.filter((i) => i.habit.status === "established"),
+  ];
+}
