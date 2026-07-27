@@ -39,6 +39,36 @@ function DialogOverlay({
   )
 }
 
+/**
+ * Smoothly animates the dialog panel when its content grows or shrinks
+ * (e.g. conditional form sections). Measures the content with a
+ * ResizeObserver and transitions the wrapper's explicit height, so the
+ * panel never snaps between sizes.
+ */
+function DialogAnimateSize({ children }: { children: React.ReactNode }) {
+  const innerRef = React.useRef<HTMLDivElement>(null)
+  const [height, setHeight] = React.useState<number | undefined>(undefined)
+
+  React.useEffect(() => {
+    const el = innerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setHeight(el.offsetHeight))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  return (
+    <div
+      className="overflow-hidden transition-[height,width] duration-200 ease-out"
+      style={height !== undefined ? { height } : undefined}
+    >
+      <div ref={innerRef} className="grid gap-6">
+        {children}
+      </div>
+    </div>
+  )
+}
+
 function DialogContent({
   className,
   children,
@@ -53,12 +83,12 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
       >
-        {children}
+        <DialogAnimateSize>{children}</DialogAnimateSize>
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"

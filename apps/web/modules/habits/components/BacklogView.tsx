@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Collapsible,
   CollapsibleContent,
@@ -181,6 +182,7 @@ export function BacklogView() {
             <AlertDialogAction
               onClick={() => confirmDrop?.id && drop.mutate({ id: confirmDrop.id })}
             >
+              {drop.isPending && <Spinner className="mr-2 h-4 w-4" />}
               {t("dropAction")}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import {
   type GetHabitsQuery,
 } from "@/lib/graphql/generated";
 import { invalidateHabitsQueries } from "../utils/invalidate";
+import { ChoiceButton } from "./ChoiceButton";
 
 type HabitRow = NonNullable<GetHabitsQuery["habits"]>[number];
 
@@ -42,15 +44,13 @@ function OptionGroup({
   return (
     <div className="flex gap-2">
       {options.map((o) => (
-        <Button
+        <ChoiceButton
           key={o.value}
-          type="button"
-          size="sm"
-          variant={value === o.value ? "secondary" : "outline"}
+          selected={value === o.value}
           onClick={() => onChange(o.value)}
         >
           {o.label}
-        </Button>
+        </ChoiceButton>
       ))}
     </div>
   );
@@ -208,6 +208,7 @@ export function HabitDialog({ open, onOpenChange, habit }: Props) {
             {t("cancel")}
           </Button>
           <Button onClick={submit} disabled={pending || !name.trim()}>
+            {pending && <Spinner className="mr-2 h-4 w-4" />}
             {t("save")}
           </Button>
         </DialogFooter>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -13,6 +14,7 @@ import {
   type GetActiveSprintQuery,
 } from "@/lib/graphql/generated";
 import { invalidateHabitsQueries } from "../utils/invalidate";
+import { ChoiceButton } from "./ChoiceButton";
 
 type View = NonNullable<GetActiveSprintQuery["activeSprint"]>;
 
@@ -58,17 +60,15 @@ export function RetroFlow({ view }: { view: View }) {
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {OUTCOMES.map((o) => (
-                    <Button
+                    <ChoiceButton
                       key={o}
-                      type="button"
-                      size="sm"
-                      variant={decisions[habitId] === o ? "secondary" : "outline"}
+                      selected={decisions[habitId] === o}
                       onClick={() =>
                         setDecisions((prev) => ({ ...prev, [habitId]: o }))
                       }
                     >
                       {t(o)}
-                    </Button>
+                    </ChoiceButton>
                   ))}
                 </div>
               </div>
@@ -100,6 +100,7 @@ export function RetroFlow({ view }: { view: View }) {
             });
           }}
         >
+          {complete.isPending && <Spinner className="mr-2 h-4 w-4" />}
           {t("complete")}
         </Button>
       </CardContent>

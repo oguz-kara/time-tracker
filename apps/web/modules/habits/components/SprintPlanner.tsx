@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { AlertTriangle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -18,6 +19,7 @@ import {
   useStartSprintMutation,
 } from "@/lib/graphql/generated";
 import { invalidateHabitsQueries } from "../utils/invalidate";
+import { ChoiceButton } from "./ChoiceButton";
 
 const LENGTHS = [1, 2, 3, 4];
 
@@ -69,15 +71,13 @@ export function SprintPlanner() {
           <Label>{t("length")}</Label>
           <div className="flex gap-2">
             {LENGTHS.map((w) => (
-              <Button
+              <ChoiceButton
                 key={w}
-                type="button"
-                size="sm"
-                variant={lengthWeeks === w ? "secondary" : "outline"}
+                selected={lengthWeeks === w}
                 onClick={() => setLengthWeeks(w)}
               >
                 {t("weeks", { count: w })}
-              </Button>
+              </ChoiceButton>
             ))}
           </div>
         </div>
@@ -141,6 +141,7 @@ export function SprintPlanner() {
             })
           }
         >
+          {start.isPending && <Spinner className="mr-2 h-4 w-4" />}
           {t("start")}
         </Button>
       </CardContent>

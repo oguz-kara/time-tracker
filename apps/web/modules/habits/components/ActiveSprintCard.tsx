@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { ChevronDown, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -142,6 +143,7 @@ export function ActiveSprintCard({ view }: { view: View }) {
               <AlertDialogAction
                 onClick={() => confirmDropId && remove.mutate({ habitId: confirmDropId })}
               >
+                {remove.isPending && <Spinner className="mr-2 h-4 w-4" />}
                 {t("drop")}
               </AlertDialogAction>
             </AlertDialogFooter>
