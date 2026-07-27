@@ -173,3 +173,30 @@ export class InvalidTimeRangeError extends BaseError {
     super(message, 'INVALID_TIME_RANGE');
   }
 }
+
+/**
+ * Habits Errors
+ */
+export class SprintAlreadyActiveError extends BaseError {
+  constructor() {
+    super('A sprint is already active — complete its retro first', 'SPRINT_ALREADY_ACTIVE');
+  }
+}
+
+export class NoActiveSprintError extends BaseError {
+  constructor() {
+    super('No sprint is currently active', 'NO_ACTIVE_SPRINT');
+  }
+}
+
+export class HabitNotCheckableError extends BaseError {
+  constructor() {
+    super('Only habits in a sprint or established can be checked', 'HABIT_NOT_CHECKABLE');
+  }
+}
+
+export class InvalidHabitStateError extends BaseError {
+  constructor(message: string = 'Habit is not in a valid state for this action') {
+    super(message, 'INVALID_HABIT_STATE');
+  }
+}
